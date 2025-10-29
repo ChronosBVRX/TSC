@@ -137,12 +137,19 @@
     $('#transportista').addEventListener('change', updateRightPreview);
   })();
 
-  function updateRightPreview(){
-    const sel = byId('transportista').value || '';
-    const url = LOGO_RIGHT[sel] || '';
-    $('#prev-right').src = url || '';
-  }
+ function updateRightPreview() {
+  const sel = byId('transportista').value || '';
+  const url = LOGO_RIGHT[sel] || '';
+  const img = $('#prev-right');
 
+  if (url) {
+    img.src = url;
+    img.style.display = 'block';
+  } else {
+    img.src = '';
+    img.style.display = 'none'; // 🔹 Oculta la imagen cuando no hay transportista
+  }
+}
   async function dbLoadHeader(){
     const { data, error } = await sb.from('header').select('*').eq('id','dia').maybeSingle();
     if(error && error.code!=='PGRST116') console.error(error);
