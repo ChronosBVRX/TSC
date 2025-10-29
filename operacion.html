@@ -1,73 +1,30 @@
 <!doctype html>
 <html lang="es">
 <head>
-<meta charset="utf-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Operación del día</title>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Operación del día – Alta</title>
 <script src="https://cdn.tailwindcss.com"></script>
-<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
-<style>
-  .sheet{width:980px;background:#fff;color:#111827;border:1px solid #d1d5db;border-radius:6px;padding:14px;margin:auto}
-  .sheet .top{display:grid;grid-template-columns:1fr auto 1fr;align-items:center}
-  .sheet img.logo{height:58px;object-fit:contain}
-  .sheet h1{font-size:18px;margin:0;font-weight:800;text-align:center}
-  .sheet .meta{margin-top:6px;border:1px solid #d1d5db;padding:6px 10px;font-size:14px}
-  .sheet table{width:100%;border-collapse:collapse;margin-top:8px}
-  .sheet th,.sheet td{border:1px solid #d1d5db;padding:6px 8px;font-size:14px}
-  .sheet th{background:#eef2f7;text-align:center}
-  .status-ok{color:#065f46;font-weight:700}
-  .status-2v{color:#7a3b00;font-weight:700}
-  .totals td{background:#e8eef7;font-weight:700}
-</style>
 </head>
 <body class="bg-slate-950 text-slate-100">
-<main class="max-w-6xl mx-auto p-4 space-y-4">
+<main class="max-w-3xl mx-auto p-4 space-y-4">
 
   <section class="rounded-2xl border border-slate-800/70 bg-slate-900/60 p-4">
-    <h2 class="text-sm font-semibold mb-3">Encabezado del reporte</h2>
+    <h2 class="text-sm font-semibold mb-3">Encabezado del día</h2>
     <div class="grid md:grid-cols-3 gap-3">
-      <label class="text-xs grid gap-1">
-        <span>Cliente</span>
-        <input id="cliente" class="px-3 py-2 rounded-lg bg-slate-900 border border-slate-700" value="FORD">
-      </label>
-      <label class="text-xs grid gap-1">
-        <span>Buque</span>
-        <input id="buque" class="px-3 py-2 rounded-lg bg-slate-900 border border-slate-700" placeholder="LAPIS ARROW">
-      </label>
-      <label class="text-xs grid gap-1">
-        <span>Fecha</span>
-        <input id="fecha" type="date" class="px-3 py-2 rounded-lg bg-slate-900 border border-slate-700">
-      </label>
+      <label class="text-xs grid gap-1"><span>Cliente</span><input id="cliente" class="px-3 py-2 rounded-lg bg-slate-900 border border-slate-700" value="FORD"/></label>
+      <label class="text-xs grid gap-1"><span>Buque</span><input id="buque" class="px-3 py-2 rounded-lg bg-slate-900 border border-slate-700" placeholder="LAPIS ARROW"/></label>
+      <label class="text-xs grid gap-1"><span>Fecha</span><input id="fecha" type="date" class="px-3 py-2 rounded-lg bg-slate-900 border border-slate-700"/></label>
     </div>
-    <div class="grid md:grid-cols-2 gap-3 mt-3">
-      <label class="text-xs grid gap-1">
-        <span>Logo izquierdo (TSC)</span>
-        <input id="logoLeft" type="file" accept="image/*" class="px-3 py-2 rounded-lg bg-slate-900 border border-slate-700">
-      </label>
-      <label class="text-xs grid gap-1">
-        <span>Logo derecho (Cliente)</span>
-        <input id="logoRight" type="file" accept="image/*" class="px-3 py-2 rounded-lg bg-slate-900 border border-slate-700">
-      </label>
-    </div>
+    <p class="mt-2 text-[11px] text-slate-400">Este encabezado se usará en el reporte (PNG/CSV) desde la pestaña <b>Activas</b>.</p>
   </section>
 
   <section class="rounded-2xl border border-slate-800/70 bg-slate-900/60 p-4">
-    <h2 class="text-sm font-semibold mb-3">Alta de operaciones diarias (madrinas)</h2>
+    <h2 class="text-sm font-semibold mb-3">Agregar operación</h2>
     <div class="grid md:grid-cols-5 gap-3">
-      <label class="text-xs grid gap-1">
-        <span>Eco</span>
-        <input id="eco" class="px-3 py-2 rounded-lg bg-slate-900 border border-slate-700" placeholder="17017 / M1">
-      </label>
-      <label class="text-xs grid gap-1">
-        <span>N° de VINS</span>
-        <input id="vins" type="number" value="9" min="0" class="px-3 py-2 rounded-lg bg-slate-900 border border-slate-700">
-      </label>
-      <label class="text-xs grid gap-1">
-        <span>N° de Viaje</span>
-        <input id="viaje" class="px-3 py-2 rounded-lg bg-slate-900 border border-slate-700" placeholder="MED-01">
-      </label>
-      <label class="text-xs grid gap-1">
-        <span>Status</span>
+      <label class="text-xs grid gap-1"><span>Eco</span><input id="eco" class="px-3 py-2 rounded-lg bg-slate-900 border border-slate-700" placeholder="17017 / M1"/></label>
+      <label class="text-xs grid gap-1"><span>N° de VINS</span><input id="vins" type="number" value="9" min="0" class="px-3 py-2 rounded-lg bg-slate-900 border border-slate-700"/></label>
+      <label class="text-xs grid gap-1"><span>N° de Viaje</span><input id="viaje" class="px-3 py-2 rounded-lg bg-slate-900 border border-slate-700" placeholder="MED-01"/></label>
+      <label class="text-xs grid gap-1"><span>Status</span>
         <select id="status" class="px-3 py-2 rounded-lg bg-slate-900 border border-slate-700">
           <option>TRAYECTO A ASLA</option>
           <option>EN TERMINAL PROCESO DE CARGA</option>
@@ -94,212 +51,45 @@
       </div>
     </div>
 
-    <div class="mt-3 overflow-x-auto">
-      <table class="min-w-full text-sm">
-        <thead>
-          <tr class="bg-slate-800 text-slate-300">
-            <th class="px-3 py-2 text-left">Eco</th>
-            <th class="px-3 py-2">N° VINS</th>
-            <th class="px-3 py-2">N° Viaje</th>
-            <th class="px-3 py-2 text-left">Status</th>
-            <th class="px-3 py-2">Acciones</th>
-          </tr>
-        </thead>
-        <tbody id="opsBody"></tbody>
-        <tfoot>
-          <tr class="border-t border-slate-800">
-            <th class="px-3 py-2 text-left">Total</th>
-            <th id="totalVins" class="px-3 py-2 text-center">0</th>
-            <th id="totalViajes" class="px-3 py-2 text-center">0</th>
-            <th class="px-3 py-2" colspan="2"></th>
-          </tr>
-        </tfoot>
-      </table>
-    </div>
-
-    <div class="mt-3 flex flex-wrap gap-2">
-      <button class="px-3 py-2 text-xs rounded-lg border border-slate-700" onclick="saveData()">Guardar (local)</button>
-      <button class="px-3 py-2 text-xs rounded-lg border border-slate-700" onclick="loadData()">Cargar</button>
-      <button class="px-3 py-2 text-xs rounded-lg border border-rose-700 text-rose-300" onclick="clearAll()">Limpiar todo</button>
-      <button class="px-3 py-2 text-xs rounded-lg border border-slate-700" onclick="exportCSV()">Exportar CSV</button>
-    </div>
-  </section>
-
-  <section class="rounded-2xl border border-slate-800/70 bg-slate-900/60 p-4">
-    <h2 class="text-sm font-semibold mb-3">Vista previa del reporte / Imagen para cliente</h2>
-    <div id="sheet" class="sheet">
-      <div class="top">
-        <img id="imgLeft" class="logo" alt="Logo Izq">
-        <h1>PROGRAMMING OF THE DAY</h1>
-        <img id="imgRight" class="logo" alt="Logo Der">
-      </div>
-      <div class="meta">
-        <div><b>Cliente:</b> <span id="metaCliente">FORD</span> &nbsp;&nbsp; <b>Buque:</b> <span id="metaBuque">-</span></div>
-        <div><b>Date:</b> <span id="metaFecha"></span></div>
-      </div>
-      <table>
-        <thead><tr><th>Eco</th><th>N° de VINS</th><th>N° Viaje</th><th>Status</th></tr></thead>
-        <tbody id="sheetBody"></tbody>
-        <tfoot><tr class="totals"><td><b>Programming</b></td><td id="sTotalVins">0</td><td id="sTotalViajes">0</td><td></td></tr></tfoot>
-      </table>
-      <div style="height:10px"></div>
-      <table>
-        <thead>
-          <tr><th colspan="2" style="text-align:left">Viajes a subir a sistema</th></tr>
-          <tr><th>Eco</th><th>N° Viaje</th></tr>
-        </thead>
-        <tbody id="sheetPendBody"></tbody>
-      </table>
-      <div class="text-gray-500 text-xs mt-2">Generado por TSC Logistics · Monitor</div>
-    </div>
-
+    <div id="last-msg" class="mt-3 text-xs text-emerald-300 hidden">Operación agregada a <b>Activas</b>.</div>
     <div class="mt-3 flex gap-2">
-      <button class="rounded-lg bg-emerald-600 hover:bg-emerald-500 px-3 py-2 text-xs font-semibold" onclick="makePNG()">Generar PNG</button>
-      <button class="rounded-lg border border-slate-700 px-3 py-2 text-xs" onclick="syncHeader()">Actualizar vista</button>
+      <a href="activas.html" class="px-3 py-2 text-xs rounded-lg border border-slate-700">Ir a Activas</a>
     </div>
   </section>
 </main>
 
 <script>
-  const $=s=>document.querySelector(s);
   const byId=id=>document.getElementById(id);
-  const state={ops:[],pend:[],logos:{left:null,right:null}};
-  const placeholderLeft='data:image/svg+xml;utf8,'+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="240" height="80"><rect width="100%" height="100%" fill="#0ea5e9"/><text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" font-family="Arial" font-weight="700" font-size="22" fill="white">TSC LOGISTICS</text></svg>`);
-  const placeholderRight='data:image/svg+xml;utf8,'+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="240" height="80"><rect width="100%" height="100%" fill="#f59e0b"/><text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" font-family="Arial" font-weight="700" font-size="22" fill="#111827">CLIENTE</text></svg>`);
+  const KEY_HEADER='tsc_monitor';      // guarda header {header:{...}}
+  const KEY_ACTIVE='tsc_ops_active';   // array de operaciones activas
 
-  (()=>{const d=new Date().toISOString().slice(0,10); byId('fecha').value=d; syncHeader(); byId('imgLeft').src=placeholderLeft; byId('imgRight').src=placeholderRight; if(location.hash==='#autoPNG'){ setTimeout(makePNG, 600); }})();
-
-  byId('logoLeft').addEventListener('change',e=>toDataURL(e.target.files[0]).then(u=>{state.logos.left=u; byId('imgLeft').src=u||placeholderLeft;}));
-  byId('logoRight').addEventListener('change',e=>toDataURL(e.target.files[0]).then(u=>{state.logos.right=u; byId('imgRight').src=u||placeholderRight;}));
-  function toDataURL(f){return new Promise(r=>{if(!f)return r(null); const fr=new FileReader(); fr.onload=()=>r(fr.result); fr.readAsDataURL(f);})}
+  (()=>{ byId('fecha').value=new Date().toISOString().slice(0,10); loadHeader(); })();
 
   function addOp(){
-    const eco=byId('eco').value.trim();
-    const vins=parseInt(byId('vins').value||'0',10);
-    const viaje=byId('viaje').value.trim();
-    const status=byId('status').value;
-    if(!eco||!viaje){alert('Eco y N° de Viaje son obligatorios');return}
-    state.ops.push({eco,vins,viaje,status});
+    const eco=byId('eco').value.trim(), vins=parseInt(byId('vins').value||'0',10),
+          viaje=byId('viaje').value.trim(), status=byId('status').value;
+    if(!eco||!viaje){ alert('Eco y N° de Viaje son obligatorios'); return; }
+
+    // Guarda/actualiza encabezado del día
+    const payload={ header:{ cliente:byId('cliente').value, buque:byId('buque').value, fecha:byId('fecha').value } };
+    localStorage.setItem(KEY_HEADER, JSON.stringify(Object.assign(loadHeader()||{}, payload)));
+
+    // Agrega a Activas
+    const ops = loadActive();
+    ops.push({ id: crypto.randomUUID?.() || String(Date.now())+Math.random().toString(16).slice(2),
+               eco, vins, viaje, status, createdAt: Date.now() });
+    localStorage.setItem(KEY_ACTIVE, JSON.stringify(ops));
+
+    // Limpia campos y muestra aviso
     byId('eco').value=''; byId('viaje').value='';
-    renderOps(); syncHeader();
-  }
-  function delOp(i){state.ops.splice(i,1); renderOps(); syncHeader();}
-  function renderOps(){
-    const tb=byId('opsBody'); tb.innerHTML='';
-    let tv=0,tr=0;
-    state.ops.forEach((r,i)=>{
-      tv+=r.vins||0; tr++;
-      const row=document.createElement('tr');
-      row.className='border-b border-slate-800';
-      row.innerHTML=`<td class="px-3 py-2">${esc(r.eco)}</td>
-        <td class="px-3 py-2 text-center">${r.vins??''}</td>
-        <td class="px-3 py-2 text-center">${esc(r.viaje)}</td>
-        <td class="px-3 py-2">${esc(r.status)}</td>
-        <td class="px-3 py-2 text-center"><button class="text-rose-300 text-xs border border-rose-700 px-2 py-1 rounded" onclick="delOp(${i})">Eliminar</button></td>`;
-      tb.appendChild(row);
-    });
-    byId('totalVins').textContent=tv;
-    byId('totalViajes').textContent=tr;
+    const msg=byId('last-msg'); msg.classList.remove('hidden'); setTimeout(()=>msg.classList.add('hidden'), 1800);
   }
 
-  function addPend(){
-    const eco=byId('pEco')?.value?.trim()||'';
-    const viaje=byId('pViaje')?.value?.trim()||'';
-    if(!eco||!viaje){alert('Eco y N° de Viaje son obligatorios');return}
-    state.pend.push({eco,viaje});
-    byId('pEco').value=''; byId('pViaje').value='';
-    renderPend(); syncHeader();
-  }
-  function delPend(i){state.pend.splice(i,1); renderPend(); syncHeader();}
-  function renderPend(){
-    const tb=byId('pendBody'); if(!tb) return; tb.innerHTML='';
-    state.pend.forEach((r,i)=>{
-      const row=document.createElement('tr'); row.className='border-b border-slate-800';
-      row.innerHTML=`<td class="px-3 py-2">${esc(r.eco)}</td>
-        <td class="px-3 py-2 text-center">${esc(r.viaje)}</td>
-        <td class="px-3 py-2 text-center"><button class="text-rose-300 text-xs border border-rose-700 px-2 py-1 rounded" onclick="delPend(${i})">Eliminar</button></td>`;
-      tb.appendChild(row);
-    });
-  }
-
-  function statusClass(s){
-    s = String(s||'').toUpperCase();
-    if(s.includes('DESCARGADO 100%')) return 'status-ok';
-    if(s.includes('VUELTA')) return 'status-2v';
-    return '';
-  }
-
-  function syncHeader(){
-    byId('metaCliente').textContent = byId('cliente').value || '-';
-    byId('metaBuque').textContent   = byId('buque').value   || '-';
-    byId('metaFecha').textContent   = byId('fecha').value   || '-';
-
-    const sb=byId('sheetBody'); sb.innerHTML='';
-    let tv=0,tr=0;
-    state.ops.forEach(r=>{
-      tv+=r.vins||0; tr++;
-      const cls = statusClass(r.status);
-      const trEl=document.createElement('tr');
-      trEl.innerHTML=`<td>${esc(r.eco)}</td>
-        <td style="text-align:center">${r.vins??''}</td>
-        <td style="text-align:center">${esc(r.viaje)}</td>
-        <td class="${cls}">${esc(r.status)}</td>`;
-      sb.appendChild(trEl);
-    });
-    byId('sTotalVins').textContent=tv;
-    byId('sTotalViajes').textContent=tr;
-
-    const sp=byId('sheetPendBody'); sp.innerHTML='';
-    state.pend.forEach(r=>{
-      const trEl=document.createElement('tr');
-      trEl.innerHTML=`<td>${esc(r.eco)}</td><td>${esc(r.viaje)}</td>`;
-      sp.appendChild(trEl);
-    });
-
-    byId('imgLeft').src=state.logos.left||placeholderLeft;
-    byId('imgRight').src=state.logos.right||placeholderRight;
-  }
-
-  async function makePNG(){
-    syncHeader();
-    const canvas=await html2canvas(document.getElementById('sheet'),{scale:2,backgroundColor:'#ffffff'});
-    const url=canvas.toDataURL('image/png');
-    const a=document.createElement('a');
-    a.href=url; a.download=`TSC_Programming_${byId('fecha').value||'fecha'}.png`; a.click();
-  }
-
-  function exportCSV(){
-    const rows=[['Eco','N° de VINS','N° Viaje','Status']];
-    state.ops.forEach(r=>rows.push([r.eco,r.vins,r.viaje,r.status]));
-    rows.push(['Programming', sumVins(), state.ops.length, '']);
-    rows.push([]); rows.push(['Viajes a subir a sistema','','','']); rows.push(['Eco','N° Viaje']);
-    state.pend.forEach(r=>rows.push([r.eco,r.viaje]));
-    const csv = rows.map(r=>r.map(x=>`"${String(x??'').replaceAll('"','""')}"`).join(',')).join('\n');
-    download(csv,'text/csv',`TSC_Programming_${byId('fecha').value||'fecha'}.csv`);
-  }
-  function download(content,mime,name){
-    const blob=new Blob([content],{type:mime}); const url=URL.createObjectURL(blob);
-    const a=document.createElement('a'); a.href=url; a.download=name; a.click();
-    setTimeout(()=>URL.revokeObjectURL(url),4000);
-  }
-  function saveData(){
-    const payload={header:{cliente:byId('cliente').value,buque:byId('buque').value,fecha:byId('fecha').value},ops:state.ops,pend:state.pend,logos:state.logos};
-    localStorage.setItem('tsc_monitor', JSON.stringify(payload));
-    alert('Guardado localmente.');
-  }
-  function loadData(){
-    const raw=localStorage.getItem('tsc_monitor'); if(!raw){alert('No hay datos guardados'); return}
-    try{
-      const d=JSON.parse(raw);
-      byId('cliente').value=d.header?.cliente||''; byId('buque').value=d.header?.buque||''; byId('fecha').value=d.header?.fecha||'';
-      state.ops=d.ops||[]; state.pend=d.pend||[]; state.logos=d.logos||{};
-      byId('imgLeft').src=state.logos.left||placeholderLeft; byId('imgRight').src=state.logos.right||placeholderRight;
-      renderOps(); renderPend(); syncHeader();
-    }catch(e){console.error(e); alert('Error al cargar.')}
-  }
-  function clearAll(){ if(confirm('¿Limpiar todo?')){ state.ops=[]; state.pend=[]; renderOps(); renderPend(); syncHeader(); } }
-  function sumVins(){return state.ops.reduce((a,b)=>a+(b.vins||0),0)}
-  function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+  function loadHeader(){ try{ const raw=localStorage.getItem(KEY_HEADER); const d=raw?JSON.parse(raw):null;
+      if(d?.header){ byId('cliente').value=d.header.cliente||''; byId('buque').value=d.header.buque||''; byId('fecha').value=d.header.fecha||byId('fecha').value; }
+      return d;
+    }catch{ return null } }
+  function loadActive(){ try{ return JSON.parse(localStorage.getItem(KEY_ACTIVE))||[] } catch{ return [] } }
 </script>
 </body>
 </html>
