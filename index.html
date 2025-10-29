@@ -65,7 +65,7 @@
           <button type="submit" class="mt-2 rounded-xl bg-cyan-600 px-4 py-2 text-sm font-semibold hover:bg-cyan-500">Ingresar</button>
         </form>
         <p id="login-error" class="mt-3 text-sm text-rose-400 hidden"></p>
-        <p class="mt-6 text-[11px] text-slate-500">Acceso estático para demostración. Para mayor seguridad, considerar un proveedor de autenticación externo.</p>
+        <p class="mt-6 text-[11px] text-slate-500">Acceso estático para demostración.</p>
       </div>
     </main>
 
@@ -95,9 +95,12 @@
 
       <section class="mx-auto mt-3 max-w-7xl px-4 pb-6">
         <div class="h-[70vh] overflow-hidden rounded-2xl border border-slate-800 bg-slate-900 neon-panel glow">
-          <iframe id="content-frame" class="h-full w-full" referrerpolicy="no-referrer" sandbox="allow-same-origin allow-scripts allow-forms allow-popups"></iframe>
+          <!-- SANDBOX actualizado para permitir abrir ZEEK en la MISMA pestaña del index por acción del usuario -->
+          <iframe id="content-frame" class="h-full w-full"
+            referrerpolicy="no-referrer"
+            sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-top-navigation-by-user-activation"></iframe>
         </div>
-        <p class="mt-2 text-[11px] text-slate-500">Nota: las páginas embebidas deben permitir <code>X-Frame-Options: SAMEORIGIN</code> o usar <code>Content-Security-Policy: frame-ancestors</code> con este dominio.</p>
+        <p class="mt-2 text-[11px] text-slate-500">Nota: algunas páginas pueden bloquear el embebido por políticas de seguridad.</p>
       </section>
     </main>
   </div>
@@ -115,6 +118,7 @@
     const $=(s)=>document.querySelector(s), $$=(s)=>Array.from(document.querySelectorAll(s));
     const viewLogin=$('#view-login'), viewApp=$('#view-app'), userEmail=$('#user-email'), btnLogout=$('#btn-logout');
     const iframe=$('#content-frame'), btnRefresh=$('#btn-refresh'), btnOpenNew=$('#btn-open-new');
+
     function setActiveTab(name){
       $$('.tab-btn').forEach(b=>{ const a=b.dataset.tab===name;
         b.classList.toggle('active',a); b.classList.toggle('bg-cyan-500/10',a);
@@ -123,12 +127,17 @@
       });
       loadIframeFor(name); localStorage.setItem('lastTab',name);
     }
-    function loadIframeFor(name){ const url=URLS[name]; if(!url) return; iframe.classList.add('loading');
-      iframe.src=url+(url.includes('?')?'&':'?')+'ts='+Date.now(); }
+    function loadIframeFor(name){
+      const url=URLS[name]; if(!url) return;
+      iframe.classList.add('loading');
+      iframe.src=url+(url.includes('?')?'&':'?')+'ts='+Date.now();
+    }
     iframe.addEventListener('load',()=>iframe.classList.remove('loading'));
     $$('.tab-btn').forEach(b=> b.addEventListener('click',()=>setActiveTab(b.dataset.tab)));
     btnRefresh.addEventListener('click',()=>{ const a=document.querySelector('.tab-btn.active')?.dataset.tab||'operacion'; loadIframeFor(a); });
     btnOpenNew.addEventListener('click',()=>{ const a=document.querySelector('.tab-btn.active')?.dataset.tab||'operacion'; const url=URLS[a]; if(url) window.open(url,'_blank','noopener'); });
+
+    // Login estático
     const loginForm=document.getElementById('login-form');
     loginForm.addEventListener('submit',async e=>{
       e.preventDefault(); $('#login-error').classList.add('hidden');
@@ -139,11 +148,13 @@
       }catch(err){ console.error(err); $('#login-error').textContent=err.message||'Error al iniciar sesión'; $('#login-error').classList.remove('hidden'); }
     });
     btnLogout.addEventListener('click',()=>{ localStorage.removeItem('sessionEmail'); renderForAuth(null); });
+
     async function onAuthChanged(user){ renderForAuth(user); if(user){ const last=localStorage.getItem('lastTab')||'operacion'; setActiveTab(last); } }
     function renderForAuth(user){
       if(user){ viewLogin.classList.add('hidden'); viewApp.classList.remove('hidden'); viewApp.classList.add('animate-in'); userEmail.textContent=user.email; userEmail.classList.remove('hidden'); btnLogout.classList.remove('hidden'); }
       else{ viewApp.classList.add('hidden'); viewLogin.classList.remove('hidden'); userEmail.classList.add('hidden'); btnLogout.classList.add('hidden'); }
     }
+
     (async ()=>{ const email=localStorage.getItem('sessionEmail'); await onAuthChanged(email?{email}:null);
       const host=location.hostname; const envLabel=host.includes('localhost')?'DEV':(host.includes('staging')?'STG':'PROD');
       document.getElementById('env-label').textContent=`Entorno ${envLabel}`; })();
