@@ -62,13 +62,13 @@
     <h3 class="text-sm font-semibold mb-2">Vista previa del reporte</h3>
     <div id="sheet" class="sheet">
       <div class="top">
-        <img id="imgLeft" class="logo" alt="Logo Izq">
+        <img id="imgLeft" class="logo" alt="Logo TSC">
         <h1>PROGRAMMING OF THE DAY</h1>
-        <img id="imgRight" class="logo" alt="Logo Der">
+        <img id="imgRight" class="logo" alt="Logo Transportista">
       </div>
       <div class="meta">
         <div><b>Cliente:</b> <span id="metaCliente">-</span> &nbsp;&nbsp; <b>Buque:</b> <span id="metaBuque">-</span></div>
-        <div><b>Date:</b> <span id="metaFecha">-</span></div>
+        <div><b>Date:</b> <span id="metaFecha">-</span> &nbsp;&nbsp; <b>Transportista:</b> <span id="metaTrans">-</span></div>
       </div>
       <table>
         <thead><tr><th>Eco</th><th>N° de VINS</th><th>N° Viaje</th><th>Status</th></tr></thead>
@@ -81,10 +81,15 @@
 
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script>
-  // === SUPABASE (tus datos) ===
+  // SUPABASE
   const SUPABASE_URL = "https://xugajqlyvojqeciawpzj.supabase.co";
   const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh1Z2FqcWx5dm9qcWVjaWF3cHpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE3NjM4MzksImV4cCI6MjA3NzMzOTgzOX0.tt2_6zqf9R0cGO6Fenx_FJO6sAg6jM_CYY1Peuq6Qyo";
   const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  // Logos RAW
+  const LOGO_LEFT_TSC = "https://raw.githubusercontent.com/ChronosBVRX/TSC/main/Imagen%20de%20WhatsApp%202025-10-29%20a%20las%2013.29.51_292c634c.jpg";
+  const FALLBACK_TRANSPORT = ""; // si no hay transportista
+  const $=s=>document.querySelector(s), byId=id=>document.getElementById(id);
 
   const STATUS_LIST=[
     "TRAYECTO A ASLA","EN TERMINAL PROCESO DE CARGA","SALIENDO DE TERMINAL CARGADO",
@@ -93,10 +98,7 @@
     "EN PATIO EN PROCESO DE DESCARGA","EN TRAYECTO A PATIO DE RESGUARDO","CARGADO EN PATIO DE RESGUARDO",
     "TRAYECTO A TERMINAL","REGISTRADO EN ESPERA DE LLAMADO","EN TERMINAL EN ESPERA DE CARGA EN ASLA"
   ];
-  const placeholderLeft='data:image/svg+xml;utf8,'+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="240" height="80"><rect width="100%" height="100%" fill="#0ea5e9"/><text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" font-family="Arial" font-weight="700" font-size="22" fill="white">TSC LOGISTICS</text></svg>`);
-  const placeholderRight='data:image/svg+xml;utf8,'+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="240" height="80"><rect width="100%" height="100%" fill="#f59e0b"/><text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" font-family="Arial" font-weight="700" font-size="22" fill="#111827">CLIENTE</text></svg>`);
 
-  const $=s=>document.querySelector(s), byId=id=>document.getElementById(id);
   function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
   function statusClass(s){ s=String(s||'').toUpperCase(); if(s.includes('DESCARGADO 100%')) return 'status-ok'; if(s.includes('VUELTA')) return 'status-2v'; return ''; }
 
@@ -110,27 +112,24 @@
     if(error){ console.error(error); return [] }
     return data || [];
   }
-  async function dbUpdateStatus(id, status){
-    const { error } = await sb.from('ops_active').update({ status }).eq('id', id);
-    if(error) console.error(error);
-  }
-  async function dbDeleteOp(id){
-    const { error } = await sb.from('ops_active').delete().eq('id', id);
-    if(error) console.error(error);
-  }
-  async function dbClearAll(){
-    const { error } = await sb.from('ops_active').delete().neq('id','00000000-0000-0000-0000-000000000000');
-    if(error) console.error(error);
-  }
+  async function dbUpdateStatus(id, status){ await sb.from('ops_active').update({ status }).eq('id', id); }
+  async function dbDeleteOp(id){ await sb.from('ops_active').delete().eq('id', id); }
+  async function dbClearAll(){ await sb.from('ops_active').delete().neq('id','00000000-0000-0000-0000-000000000000'); }
 
   async function render(){
     const h = await dbLoadHeader();
     const ops = await dbLoadActive();
 
-    byId('head').innerHTML=`Cliente: <b>${esc(h.cliente||'-')}</b> · Buque: <b>${esc(h.buque||'-')}</b> · Fecha: <b>${esc(h.fecha||'-')}</b>`;
-    byId('metaCliente').textContent=h.cliente||'-'; byId('metaBuque').textContent=h.buque||'-'; byId('metaFecha').textContent=h.fecha||'-';
-    byId('imgLeft').src=placeholderLeft; byId('imgRight').src=placeholderRight;
+    // Encabezado y logos
+    byId('head').innerHTML=`Cliente: <b>${esc(h.cliente||'-')}</b> · Buque: <b>${esc(h.buque||'-')}</b> · Fecha: <b>${esc(h.fecha||'-')}</b> · Transportista: <b>${esc(h.transportista||'-')}</b>`;
+    byId('metaCliente').textContent=h.cliente||'-';
+    byId('metaBuque').textContent=h.buque||'-';
+    byId('metaFecha').textContent=h.fecha||'-';
+    byId('metaTrans').textContent=h.transportista||'-';
+    byId('imgLeft').src = LOGO_LEFT_TSC;
+    byId('imgRight').src = h.logo_right_url || FALLBACK_TRANSPORT;
 
+    // Tabla
     const tb=byId('tb'); tb.innerHTML='';
     let tv=0,tr=ops.length;
     ops.forEach((r)=>{
@@ -145,6 +144,7 @@
     });
     byId('k-vins').textContent=tv; byId('k-viajes').textContent=tr;
 
+    // Sheet (PNG)
     const sbdy=byId('sheetBody'); sbdy.innerHTML='';
     ops.forEach(r=>{
       const row=document.createElement('tr');
@@ -155,13 +155,7 @@
   }
 
   function statusSelect(value, id){
-    const opts=[
-      "TRAYECTO A ASLA","EN TERMINAL PROCESO DE CARGA","SALIENDO DE TERMINAL CARGADO",
-      "CARGADO EN RUTA FISCAL","POR MODULAR","TRAYECTO A PATIO DE DESCARGA","DESCARGADO 100%",
-      "1ER VUELTA","2DA VUELTA","3ER VUELTA","4TA VUELTA","5TA VUELTA",
-      "EN PATIO EN PROCESO DE DESCARGA","EN TRAYECTO A PATIO DE RESGUARDO","CARGADO EN PATIO DE RESGUARDO",
-      "TRAYECTO A TERMINAL","REGISTRADO EN ESPERA DE LLAMADO","EN TERMINAL EN ESPERA DE CARGA EN ASLA"
-    ].map(s=>`<option ${s===value?'selected':''}>${s}</option>`).join('');
+    const opts=STATUS_LIST.map(s=>`<option ${s===value?'selected':''}>${s}</option>`).join('');
     return `<select class="px-2 py-1 rounded bg-slate-900 border border-slate-700 text-xs" onchange="updateStatus('${id}', this.value)">${opts}</select>`;
   }
 
@@ -169,10 +163,14 @@
   async function terminar(id){ await dbDeleteOp(id); }
   async function vaciar(){ if(confirm('¿Vaciar todas las activas?')) await dbClearAll(); }
 
+  // CSV: agrego línea con info de logos (texto)
   function exportCSV(){
     (async ()=>{
       const h=await dbLoadHeader(); const ops=await dbLoadActive();
-      const rows=[['Eco','N° de VINS','N° Viaje','Status']];
+      const rows=[
+        ['LOGO_IZQUIERDO','TSC'], ['LOGO_DERECHO', h.transportista || ''],
+        [], ['Eco','N° de VINS','N° Viaje','Status']
+      ];
       ops.forEach(r=>rows.push([r.eco,r.vins,r.viaje,r.status]));
       rows.push(['Programming', ops.reduce((a,b)=>a+(b.vins||0),0), ops.length, '']);
       const csv=rows.map(r=>r.map(x=>`"${String(x??'').replaceAll('"','""')}"`).join(',')).join('\n');
@@ -188,10 +186,7 @@
     const a=document.createElement('a'); a.href=url; a.download=`TSC_Programming_${h.fecha||'fecha'}.png`; a.click();
   }
 
-  // Render inicial
   render();
-
-  // Realtime
   const channel = sb.channel('ops_active-realtime')
     .on('postgres_changes', { event:'*', schema:'public', table:'ops_active' }, () => render())
     .subscribe();
