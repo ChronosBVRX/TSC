@@ -1,180 +1,265 @@
 <!doctype html>
-<html lang="es">
+<html lang="es" class="h-full">
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Monitor Web TSC</title>
+  <title>Centro de Monitoreo</title>
+  <!-- Tailwind -->
   <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Iconos -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
   <style>
-    body { font-family: 'Space Grotesk', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; }
+    :root{
+      --bg:#05070b; --panel:#0b1220; --edge:#101826; --txt:#c7d2fe; --cyan:#22d3ee; --vio:#8b5cf6; --rose:#fb7185;
+    }
+    html,body{height:100%}
+    body{
+      color:#e5e7eb;
+      background:
+        radial-gradient(1200px 800px at 10% 0%,#0b1220 0%,transparent 60%),
+        radial-gradient(800px 600px at 90% 10%,#0a1630 0%,transparent 55%),
+        linear-gradient(180deg,#05070b 0%,#070b12 60%,#05070b 100%);
+      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+    }
+    /* HUD grid sutil */
+    body::before{
+      content:"";position:fixed;inset:0;pointer-events:none;background:
+        linear-gradient(transparent 31px, rgba(34,211,238,.06) 32px),
+        linear-gradient(90deg, transparent 31px, rgba(139,92,246,.06) 32px);
+      background-size:32px 32px;mask-image:radial-gradient(circle at 50% 30%, black 40%, transparent 70%);
+    }
+    /* Paneles y topbar con brillo futurista */
+    header, .neon-panel{
+      border:1px solid #0f1b2e;background:linear-gradient(180deg,#0b1220 0%, #0a1323 100%),rgba(0,0,0,.4);
+      box-shadow:0 0 0 1px rgba(34,211,238,.15) inset, 0 0 32px rgba(34,211,238,.06);
+    }
+    .glow{box-shadow:0 0 0 1px rgba(34,211,238,.18) inset, 0 0 24px rgba(139,92,246,.12)}
+    /* Tabs */
+    .tab-btn{position:relative; overflow:hidden; transition:background .35s ease,border-color .35s ease,color .35s ease, transform .25s ease}
+    .tab-btn::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;transform:scaleX(0);transform-origin:left;
+      background:linear-gradient(90deg,var(--cyan),var(--vio));transition:transform .35s ease;}
+    .tab-btn.active::after{transform:scaleX(1)}
+    .tab-btn:active{transform:translateY(1px)}
+    /* Botones */
+    .btn{border:1px solid #1b2a40;background:#0d1524}
+    .btn:hover{border-color:rgba(34,211,238,.4);box-shadow:0 0 0 1px rgba(34,211,238,.25) inset}
+    /* iFrame transiciones */
+    iframe{transition:opacity .35s ease, filter .35s ease, transform .35s ease;}
+    iframe.loading{opacity:.15; filter:blur(2px) saturate(.8); transform:scale(.996)}
+    /* Animaciones */
+    @keyframes fadeUp{from{opacity:0; transform:translateY(6px)} to{opacity:1; transform:none}}
+    .animate-in{animation:fadeUp .5s ease both}
+    @media (prefers-reduced-motion: reduce){ *{animation:none !important; transition:none !important} }
+    /* Campos */
+    .input{
+      border:1px solid #1f2a40;background:#0e1423;border-radius:.75rem;padding:.6rem .8rem;outline:none;
+    }
+    .input:focus{box-shadow:0 0 0 2px rgba(34,211,238,.35)}
   </style>
 </head>
-<body class="bg-slate-950 text-slate-100">
-  <main class="min-h-screen px-4 py-10">
-    <section id="login-view" class="mx-auto flex max-w-md flex-col gap-6 rounded-2xl border border-slate-800 bg-slate-900/60 p-8 shadow-xl shadow-cyan-500/10">
-      <div>
-        <h1 class="text-2xl font-semibold tracking-tight">Monitor Web – Acceso</h1>
-        <p class="mt-2 text-sm text-slate-400">Ingresa las credenciales proporcionadas para continuar.</p>
-      </div>
-      <form id="login-form" class="flex flex-col gap-4">
-        <label class="grid gap-2 text-sm">
-          <span class="text-slate-300">Correo electrónico</span>
-          <input required type="email" id="email" autocomplete="username" placeholder="Monitor@TSC.com" class="rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-slate-100 outline-none transition focus:border-cyan-400 focus:ring focus:ring-cyan-500/20" />
-        </label>
-        <label class="grid gap-2 text-sm">
-          <span class="text-slate-300">Contraseña</span>
-          <input required type="password" id="password" autocomplete="current-password" placeholder="••••••••" class="rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-slate-100 outline-none transition focus:border-cyan-400 focus:ring focus:ring-cyan-500/20" />
-        </label>
-        <button type="submit" class="mt-2 inline-flex items-center justify-center gap-2 rounded-lg bg-cyan-500 px-4 py-2 text-sm font-semibold text-slate-950 transition hover:bg-cyan-400 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2 focus:ring-offset-slate-900">
-          Ingresar
-        </button>
-        <p id="login-error" class="hidden rounded-lg border border-rose-500/40 bg-rose-500/10 px-3 py-2 text-sm text-rose-200"></p>
-      </form>
-      <p class="text-xs text-slate-500">Acceso estático para demostración. Para mayor seguridad, considerar un proveedor de autenticación externo.</p>
-    </section>
+<body class="h-full">
 
-    <section id="app-view" class="hidden">
-      <div class="mx-auto flex max-w-6xl flex-col gap-6">
-        <header class="flex flex-col gap-4 rounded-2xl border border-slate-800 bg-slate-900/60 p-6 shadow-xl shadow-cyan-500/10 lg:flex-row lg:items-center lg:justify-between">
+  <div id="app" class="h-full">
+    <!-- Topbar -->
+    <header class="sticky top-0 z-40 border-b border-slate-800/60 bg-slate-900/60 backdrop-blur neon-panel">
+      <div class="mx-auto max-w-7xl px-4 py-3 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="h-8 w-8 rounded-xl bg-cyan-500/20 ring-1 ring-cyan-400/40 grid place-items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" class="h-5 w-5 text-cyan-300"><path d="M3 12h18M12 3v18"/></svg>
+          </div>
           <div>
-            <h1 class="text-2xl font-semibold">Monitor Web TSC</h1>
-            <p class="text-sm text-slate-400">Panel centralizado para operación, monitoreo y reportes.</p>
+            <h1 class="text-sm font-semibold leading-tight">Centro de Monitoreo</h1>
+            <p id="env-label" class="text-[11px] text-slate-400">Entorno</p>
           </div>
-          <div class="flex flex-wrap items-center gap-3">
-            <div class="rounded-full border border-cyan-500/30 bg-cyan-500/10 px-3 py-1 text-xs font-medium text-cyan-300">Sesión activa</div>
-            <button id="logout" class="inline-flex items-center gap-2 rounded-lg border border-slate-700 px-4 py-2 text-xs font-semibold text-slate-200 transition hover:border-rose-500/60 hover:bg-rose-500/10">Cerrar sesión</button>
-          </div>
-        </header>
-
-        <nav class="flex flex-wrap gap-2 rounded-2xl border border-slate-800 bg-slate-900/60 p-3 shadow-xl shadow-cyan-500/10">
-          <button data-tab="operacion.html" class="tab-button active inline-flex items-center gap-2 rounded-lg border border-cyan-500/40 bg-cyan-500/20 px-4 py-2 text-sm font-medium text-cyan-200 transition hover:border-cyan-400 hover:bg-cyan-400/20">Operación del día</button>
-          <button data-tab="monitoreo.html" class="tab-button inline-flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-800 px-4 py-2 text-sm font-medium text-slate-200 transition hover:border-cyan-400 hover:bg-cyan-400/10">Monitoreo</button>
-          <button data-tab="reportes.html" class="tab-button inline-flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-800 px-4 py-2 text-sm font-medium text-slate-200 transition hover:border-cyan-400 hover:bg-cyan-400/10">Reportes</button>
-        </nav>
-
-        <section class="flex flex-col gap-3 rounded-2xl border border-slate-800 bg-slate-900/60 p-4 shadow-xl shadow-cyan-500/10">
-          <div class="flex flex-wrap items-center justify-between gap-3">
-            <p class="text-sm text-slate-400">Contenido embebido:</p>
-            <div class="flex gap-2 text-xs">
-              <button id="refresh-tab" class="rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 font-semibold text-slate-200 transition hover:border-cyan-400 hover:bg-cyan-400/10">Refrescar pestaña</button>
-              <button id="open-tab" class="rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 font-semibold text-slate-200 transition hover:border-cyan-400 hover:bg-cyan-400/10">Abrir en ventana</button>
-            </div>
-          </div>
-          <div class="aspect-[16/9] w-full overflow-hidden rounded-xl border border-slate-800 bg-slate-950">
-            <iframe id="content-frame" src="operacion.html" title="Contenido embebido" class="h-full w-full" sandbox="allow-same-origin allow-scripts allow-forms allow-popups"></iframe>
-          </div>
-        </section>
+        </div>
+        <div class="flex items-center gap-3">
+          <span id="user-email" class="text-xs text-slate-300 hidden"></span>
+          <button id="btn-logout" class="hidden rounded-lg px-3 py-1.5 text-xs btn">Salir</button>
+        </div>
       </div>
-    </section>
-  </main>
+    </header>
+
+    <!-- Login -->
+    <main id="view-login" class="mx-auto max-w-md p-6">
+      <div class="rounded-2xl p-6 neon-panel glow animate-in">
+        <h2 class="mb-1 text-lg font-semibold">Monitor Web – Acceso</h2>
+        <p class="mb-6 text-sm text-slate-400">Ingresa las credenciales proporcionadas para continuar.</p>
+        <form id="login-form" class="grid gap-3">
+          <label class="grid gap-1 text-sm">
+            <span>Correo electrónico</span>
+            <input id="email" type="email" required class="input" placeholder="tucorreo@empresa.com" />
+          </label>
+          <label class="grid gap-1 text-sm">
+            <span>Contraseña</span>
+            <input id="password" type="password" required class="input" placeholder="••••••••" />
+          </label>
+          <button type="submit" class="mt-2 rounded-xl bg-cyan-600 px-4 py-2 text-sm font-semibold hover:bg-cyan-500">Ingresar</button>
+        </form>
+        <p id="login-error" class="mt-3 text-sm text-rose-400 hidden"></p>
+        <p class="mt-6 text-[11px] text-slate-500">
+          Acceso estático para demostración. Para mayor seguridad, considerar un proveedor de autenticación externo.
+        </p>
+      </div>
+    </main>
+
+    <!-- App -->
+    <main id="view-app" class="hidden">
+      <!-- Tabs -->
+      <nav class="mx-auto max-w-7xl px-4 pt-4">
+        <div class="flex gap-2 overflow-x-auto">
+          <button data-tab="operacion" class="tab-btn active rounded-full border border-cyan-500/30 bg-cyan-500/10 px-3 py-1.5 text-xs font-semibold text-cyan-200">Operación del día</button>
+          <button data-tab="monitoreo" class="tab-btn rounded-full border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs">Monitoreo</button>
+          <button data-tab="reportes"  class="tab-btn rounded-full border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs">Reportes</button>
+        </div>
+      </nav>
+
+      <!-- Toolbar -->
+      <section class="mx-auto mt-3 max-w-7xl px-4 animate-in">
+        <div class="flex flex-wrap items-center justify-between gap-3 rounded-xl p-3 neon-panel glow">
+          <div class="flex items-center gap-2 text-xs text-slate-400">
+            <span class="inline-flex h-2.5 w-2.5 animate-pulse rounded-full bg-emerald-400"></span>
+            <span id="status-label">Conectado</span>
+          </div>
+          <div class="flex items-center gap-2">
+            <button id="btn-refresh" class="rounded-lg px-3 py-1.5 text-xs btn">Refrescar pestaña</button>
+            <button id="btn-open-new" class="rounded-lg px-3 py-1.5 text-xs btn">Abrir en ventana</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- iFrame -->
+      <section class="mx-auto mt-3 max-w-7xl px-4 pb-6">
+        <div class="h-[70vh] overflow-hidden rounded-2xl border border-slate-800 bg-slate-900 neon-panel glow">
+          <iframe id="content-frame" class="h-full w-full" referrerpolicy="no-referrer" sandbox="allow-same-origin allow-scripts allow-forms allow-popups"></iframe>
+        </div>
+        <p class="mt-2 text-[11px] text-slate-500">Nota: las páginas embebidas deben permitir <code>X-Frame-Options: SAMEORIGIN</code> o usar <code>Content-Security-Policy: frame-ancestors</code> con este dominio.</p>
+      </section>
+    </main>
+  </div>
 
   <script>
+    // ====== CONFIG: Auth estática + Rutas ======
     const STATIC_AUTH = {
       user: "Monitor@TSC.com",
+      // SHA-256 Base64 de "monitor123321"
       pass_hash: "WMpuIG2Kaatbz1D9230zzEFx5JyCZCMi32HMeC8sSs8"
     };
-    const STORAGE_KEY = "tsc-monitor-session";
 
-    const loginView = document.getElementById("login-view");
-    const appView = document.getElementById("app-view");
-    const loginForm = document.getElementById("login-form");
-    const loginError = document.getElementById("login-error");
-    const logoutButton = document.getElementById("logout");
-    const tabButtons = Array.from(document.querySelectorAll(".tab-button"));
-    const frame = document.getElementById("content-frame");
-    const refreshButton = document.getElementById("refresh-tab");
-    const openButton = document.getElementById("open-tab");
+    const URLS = {
+      operacion: "operacion.html",
+      monitoreo: "monitoreo.html",
+      reportes:  "reportes.html"
+    };
 
-    function toggleAppView(showApp) {
-      if (showApp) {
-        loginView.classList.add("hidden");
-        appView.classList.remove("hidden");
-      } else {
-        loginView.classList.remove("hidden");
-        appView.classList.add("hidden");
-      }
+    async function sha256Base64(text){
+      const enc = new TextEncoder().encode(text);
+      const buf = await crypto.subtle.digest('SHA-256', enc);
+      const bytes = Array.from(new Uint8Array(buf));
+      const bin = String.fromCharCode(...bytes);
+      return btoa(bin).replace(/=/g, '');
     }
 
-    async function hashPassword(password) {
-      const encoder = new TextEncoder();
-      const data = encoder.encode(password);
-      const hashBuffer = await crypto.subtle.digest("SHA-256", data);
-      const hashArray = Array.from(new Uint8Array(hashBuffer));
-      const hashString = hashArray.map(byte => String.fromCharCode(byte)).join("");
-      return btoa(hashString);
-    }
+    const $  = (s)=>document.querySelector(s);
+    const $$ = (s)=>Array.from(document.querySelectorAll(s));
+    const viewLogin = $('#view-login');
+    const viewApp   = $('#view-app');
+    const userEmail = $('#user-email');
+    const btnLogout = $('#btn-logout');
+    const iframe    = $('#content-frame');
+    const btnRefresh= $('#btn-refresh');
+    const btnOpenNew= $('#btn-open-new');
 
-    function setActiveTab(button) {
-      tabButtons.forEach(btn => {
-        btn.classList.remove("active", "border-cyan-500/40", "bg-cyan-500/20", "text-cyan-200");
-        btn.classList.add("border-slate-700", "bg-slate-800", "text-slate-200");
+    function setActiveTab(name){
+      $$('.tab-btn').forEach(b=>{
+        const active = b.dataset.tab === name;
+        b.classList.toggle('active', active);
+        b.classList.toggle('bg-cyan-500/10', active);
+        b.classList.toggle('border-cyan-500/30', active);
+        b.classList.toggle('text-cyan-200', active);
+        b.classList.toggle('bg-slate-800', !active);
+        b.classList.toggle('border-slate-700', !active);
       });
-      button.classList.add("active", "border-cyan-500/40", "bg-cyan-500/20", "text-cyan-200");
-      button.classList.remove("border-slate-700", "bg-slate-800", "text-slate-200");
+      loadIframeFor(name);
+      localStorage.setItem('lastTab', name);
     }
 
-    loginForm.addEventListener("submit", async (event) => {
-      event.preventDefault();
-      loginError.classList.add("hidden");
+    function loadIframeFor(name){
+      const url = URLS[name];
+      if(!url) return;
+      iframe.classList.add('loading');
+      iframe.src = url + (url.includes('?') ? '&' : '?') + 'ts=' + Date.now(); // cache-bust
+    }
+    iframe.addEventListener('load', ()=> iframe.classList.remove('loading'));
+    $$('.tab-btn').forEach(b=> b.addEventListener('click', ()=> setActiveTab(b.dataset.tab)));
+    btnRefresh.addEventListener('click', ()=>{
+      const active = document.querySelector('.tab-btn.active')?.dataset.tab || 'operacion';
+      loadIframeFor(active);
+    });
+    btnOpenNew.addEventListener('click', ()=>{
+      const active = document.querySelector('.tab-btn.active')?.dataset.tab || 'operacion';
+      const url = URLS[active]; if(url) window.open(url, '_blank', 'noopener');
+    });
 
-      const email = document.getElementById("email").value.trim();
-      const password = document.getElementById("password").value;
-
-      try {
-        const hashed = await hashPassword(password);
-        if (email === STATIC_AUTH.user && hashed === STATIC_AUTH.pass_hash) {
-          localStorage.setItem(STORAGE_KEY, "1");
-          toggleAppView(true);
-        } else {
-          loginError.textContent = "Credenciales inválidas. Verifica el correo y la contraseña.";
-          loginError.classList.remove("hidden");
+    // ====== Auth local ======
+    const loginForm = document.getElementById('login-form');
+    loginForm.addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      $('#login-error').classList.add('hidden');
+      const email = $('#email').value.trim();
+      const password = $('#password').value;
+      try{
+        const hash = await sha256Base64(password);
+        if(email === STATIC_AUTH.user && hash === STATIC_AUTH.pass_hash){
+          localStorage.setItem('sessionEmail', email);
+          await onAuthChanged({ email });
+        }else{
+          throw new Error('Credenciales inválidas. Verifica el correo y la contraseña.');
         }
-      } catch (error) {
-        console.error("Error hashing password", error);
-        loginError.textContent = "Ocurrió un error al validar las credenciales.";
-        loginError.classList.remove("hidden");
+      }catch(err){
+        console.error(err);
+        $('#login-error').textContent = err.message || 'Error al iniciar sesión';
+        $('#login-error').classList.remove('hidden');
       }
     });
 
-    logoutButton.addEventListener("click", () => {
-      localStorage.removeItem(STORAGE_KEY);
-      toggleAppView(false);
-      loginForm.reset();
-      tabButtons.forEach(btn => btn.blur());
+    btnLogout.addEventListener('click', async ()=>{
+      localStorage.removeItem('sessionEmail');
+      renderForAuth(null);
     });
 
-    tabButtons.forEach(button => {
-      button.addEventListener("click", () => {
-        const target = button.dataset.tab;
-        if (!target) return;
-        setActiveTab(button);
-        frame.src = target;
-      });
-    });
-
-    refreshButton.addEventListener("click", () => {
-      frame.contentWindow?.location.reload();
-    });
-
-    openButton.addEventListener("click", () => {
-      const activeButton = tabButtons.find(btn => btn.classList.contains("active"));
-      const target = activeButton?.dataset.tab ?? frame.getAttribute("src");
-      if (target) {
-        window.open(target, "_blank", "noopener,noreferrer");
+    async function onAuthChanged(user){
+      renderForAuth(user);
+      if(user){
+        const last = localStorage.getItem('lastTab') || 'operacion';
+        setActiveTab(last);
       }
-    });
-
-    window.addEventListener("DOMContentLoaded", () => {
-      const hasSession = localStorage.getItem(STORAGE_KEY) === "1";
-      toggleAppView(hasSession);
-      if (hasSession) {
-        setActiveTab(tabButtons[0]);
-        frame.src = tabButtons[0].dataset.tab;
+    }
+    function renderForAuth(user){
+      if(user){
+        viewLogin.classList.add('hidden');
+        viewApp.classList.remove('hidden');
+        viewApp.classList.add('animate-in');
+        userEmail.textContent = user.email;
+        userEmail.classList.remove('hidden');
+        btnLogout.classList.remove('hidden');
+      }else{
+        viewApp.classList.add('hidden');
+        viewLogin.classList.remove('hidden');
+        userEmail.classList.add('hidden');
+        btnLogout.classList.add('hidden');
       }
-    });
+    }
+
+    // ====== Arranque ======
+    (async ()=>{
+      const email = localStorage.getItem('sessionEmail');
+      await onAuthChanged(email ? { email } : null);
+
+      const host = location.hostname;
+      const envLabel = host.includes('localhost') ? 'DEV' : (host.includes('staging') ? 'STG' : 'PROD');
+      document.getElementById('env-label').textContent = `Entorno ${envLabel}`;
+    })();
   </script>
 </body>
 </html>
