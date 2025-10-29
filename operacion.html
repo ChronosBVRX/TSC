@@ -7,7 +7,6 @@
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <style>
-  /* Hoja clara (reporte tipo Excel) */
   .sheet{width:980px;background:#fff;color:#111827;border:1px solid #d1d5db;border-radius:6px;padding:14px;margin:auto}
   .sheet .top{display:grid;grid-template-columns:1fr auto 1fr;align-items:center}
   .sheet img.logo{height:58px;object-fit:contain}
@@ -24,7 +23,6 @@
 <body class="bg-slate-950 text-slate-100">
 <main class="max-w-6xl mx-auto p-4 space-y-4">
 
-  <!-- Encabezado -->
   <section class="rounded-2xl border border-slate-800/70 bg-slate-900/60 p-4">
     <h2 class="text-sm font-semibold mb-3">Encabezado del reporte</h2>
     <div class="grid md:grid-cols-3 gap-3">
@@ -51,10 +49,8 @@
         <input id="logoRight" type="file" accept="image/*" class="px-3 py-2 rounded-lg bg-slate-900 border border-slate-700">
       </label>
     </div>
-    <p class="mt-2 text-[11px] text-slate-400">Si no cargas logos, se usarán placeholders.</p>
   </section>
 
-  <!-- Alta de operaciones -->
   <section class="rounded-2xl border border-slate-800/70 bg-slate-900/60 p-4">
     <h2 class="text-sm font-semibold mb-3">Alta de operaciones diarias (madrinas)</h2>
     <div class="grid md:grid-cols-5 gap-3">
@@ -73,11 +69,24 @@
       <label class="text-xs grid gap-1">
         <span>Status</span>
         <select id="status" class="px-3 py-2 rounded-lg bg-slate-900 border border-slate-700">
+          <option>TRAYECTO A ASLA</option>
+          <option>EN TERMINAL PROCESO DE CARGA</option>
+          <option>SALIENDO DE TERMINAL CARGADO</option>
+          <option>CARGADO EN RUTA FISCAL</option>
+          <option>POR MODULAR</option>
+          <option>TRAYECTO A PATIO DE DESCARGA</option>
           <option>DESCARGADO 100%</option>
+          <option>1ER VUELTA</option>
           <option>2DA VUELTA</option>
-          <option>EN RUTA</option>
-          <option>EN PATIO</option>
-          <option>EN PUERTA</option>
+          <option>3ER VUELTA</option>
+          <option>4TA VUELTA</option>
+          <option>5TA VUELTA</option>
+          <option>EN PATIO EN PROCESO DE DESCARGA</option>
+          <option>EN TRAYECTO A PATIO DE RESGUARDO</option>
+          <option>CARGADO EN PATIO DE RESGUARDO</option>
+          <option>TRAYECTO A TERMINAL</option>
+          <option>REGISTRADO EN ESPERA DE LLAMADO</option>
+          <option>EN TERMINAL EN ESPERA DE CARGA EN ASLA</option>
         </select>
       </label>
       <div class="flex items-end">
@@ -116,37 +125,6 @@
     </div>
   </section>
 
-  <!-- Pendientes -->
-  <section class="rounded-2xl border border-slate-800/70 bg-slate-900/60 p-4">
-    <h2 class="text-sm font-semibold mb-3">Viajes a subir a sistema</h2>
-    <div class="grid md:grid-cols-3 gap-3">
-      <label class="text-xs grid gap-1">
-        <span>Eco</span>
-        <input id="pEco" class="px-3 py-2 rounded-lg bg-slate-900 border border-slate-700">
-      </label>
-      <label class="text-xs grid gap-1">
-        <span>N° de Viaje</span>
-        <input id="pViaje" class="px-3 py-2 rounded-lg bg-slate-900 border border-slate-700" placeholder="MED-09">
-      </label>
-      <div class="flex items-end">
-        <button class="w-full rounded-lg bg-cyan-600 hover:bg-cyan-500 px-3 py-2 text-xs font-semibold" onclick="addPend()">Agregar</button>
-      </div>
-    </div>
-    <div class="mt-3 overflow-x-auto">
-      <table class="min-w-full text-sm">
-        <thead>
-          <tr class="bg-slate-800 text-slate-300">
-            <th class="px-3 py-2 text-left">Eco</th>
-            <th class="px-3 py-2">N° Viaje</th>
-            <th class="px-3 py-2">Acciones</th>
-          </tr>
-        </thead>
-        <tbody id="pendBody"></tbody>
-      </table>
-    </div>
-  </section>
-
-  <!-- Vista previa y PNG -->
   <section class="rounded-2xl border border-slate-800/70 bg-slate-900/60 p-4">
     <h2 class="text-sm font-semibold mb-3">Vista previa del reporte / Imagen para cliente</h2>
     <div id="sheet" class="sheet">
@@ -160,13 +138,9 @@
         <div><b>Date:</b> <span id="metaFecha"></span></div>
       </div>
       <table>
-        <thead>
-          <tr><th>Eco</th><th>N° de VINS</th><th>N° Viaje</th><th>Status</th></tr>
-        </thead>
+        <thead><tr><th>Eco</th><th>N° de VINS</th><th>N° Viaje</th><th>Status</th></tr></thead>
         <tbody id="sheetBody"></tbody>
-        <tfoot>
-          <tr class="totals"><td><b>Programming</b></td><td id="sTotalVins">0</td><td id="sTotalViajes">0</td><td></td></tr>
-        </tfoot>
+        <tfoot><tr class="totals"><td><b>Programming</b></td><td id="sTotalVins">0</td><td id="sTotalViajes">0</td><td></td></tr></tfoot>
       </table>
       <div style="height:10px"></div>
       <table>
@@ -193,15 +167,12 @@
   const placeholderLeft='data:image/svg+xml;utf8,'+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="240" height="80"><rect width="100%" height="100%" fill="#0ea5e9"/><text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" font-family="Arial" font-weight="700" font-size="22" fill="white">TSC LOGISTICS</text></svg>`);
   const placeholderRight='data:image/svg+xml;utf8,'+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="240" height="80"><rect width="100%" height="100%" fill="#f59e0b"/><text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" font-family="Arial" font-weight="700" font-size="22" fill="#111827">CLIENTE</text></svg>`);
 
-  // Fecha hoy
-  (()=>{const d=new Date().toISOString().slice(0,10); byId('fecha').value=d; syncHeader(); byId('imgLeft').src=placeholderLeft; byId('imgRight').src=placeholderRight;})();
+  (()=>{const d=new Date().toISOString().slice(0,10); byId('fecha').value=d; syncHeader(); byId('imgLeft').src=placeholderLeft; byId('imgRight').src=placeholderRight; if(location.hash==='#autoPNG'){ setTimeout(makePNG, 600); }})();
 
-  // Files
   byId('logoLeft').addEventListener('change',e=>toDataURL(e.target.files[0]).then(u=>{state.logos.left=u; byId('imgLeft').src=u||placeholderLeft;}));
   byId('logoRight').addEventListener('change',e=>toDataURL(e.target.files[0]).then(u=>{state.logos.right=u; byId('imgRight').src=u||placeholderRight;}));
   function toDataURL(f){return new Promise(r=>{if(!f)return r(null); const fr=new FileReader(); fr.onload=()=>r(fr.result); fr.readAsDataURL(f);})}
 
-  // Ops
   function addOp(){
     const eco=byId('eco').value.trim();
     const vins=parseInt(byId('vins').value||'0',10);
@@ -231,10 +202,9 @@
     byId('totalViajes').textContent=tr;
   }
 
-  // Pendientes
   function addPend(){
-    const eco=byId('pEco').value.trim();
-    const viaje=byId('pViaje').value.trim();
+    const eco=byId('pEco')?.value?.trim()||'';
+    const viaje=byId('pViaje')?.value?.trim()||'';
     if(!eco||!viaje){alert('Eco y N° de Viaje son obligatorios');return}
     state.pend.push({eco,viaje});
     byId('pEco').value=''; byId('pViaje').value='';
@@ -242,7 +212,7 @@
   }
   function delPend(i){state.pend.splice(i,1); renderPend(); syncHeader();}
   function renderPend(){
-    const tb=byId('pendBody'); tb.innerHTML='';
+    const tb=byId('pendBody'); if(!tb) return; tb.innerHTML='';
     state.pend.forEach((r,i)=>{
       const row=document.createElement('tr'); row.className='border-b border-slate-800';
       row.innerHTML=`<td class="px-3 py-2">${esc(r.eco)}</td>
@@ -252,7 +222,13 @@
     });
   }
 
-  // Hoja
+  function statusClass(s){
+    s = String(s||'').toUpperCase();
+    if(s.includes('DESCARGADO 100%')) return 'status-ok';
+    if(s.includes('VUELTA')) return 'status-2v';
+    return '';
+  }
+
   function syncHeader(){
     byId('metaCliente').textContent = byId('cliente').value || '-';
     byId('metaBuque').textContent   = byId('buque').value   || '-';
@@ -262,9 +238,12 @@
     let tv=0,tr=0;
     state.ops.forEach(r=>{
       tv+=r.vins||0; tr++;
-      const st = r.status.includes('DESCARGADO') ? 'status-ok' : (r.status.includes('2DA') ? 'status-2v' : '');
+      const cls = statusClass(r.status);
       const trEl=document.createElement('tr');
-      trEl.innerHTML=`<td>${esc(r.eco)}</td><td style="text-align:center">${r.vins??''}</td><td style="text-align:center">${esc(r.viaje)}</td><td class="${st}">${esc(r.status)}</td>`;
+      trEl.innerHTML=`<td>${esc(r.eco)}</td>
+        <td style="text-align:center">${r.vins??''}</td>
+        <td style="text-align:center">${esc(r.viaje)}</td>
+        <td class="${cls}">${esc(r.status)}</td>`;
       sb.appendChild(trEl);
     });
     byId('sTotalVins').textContent=tv;
@@ -277,9 +256,8 @@
       sp.appendChild(trEl);
     });
 
-    // logos (fallback)
-    if(!state.logos.left) byId('imgLeft').src=placeholderLeft;
-    if(!state.logos.right) byId('imgRight').src=placeholderRight;
+    byId('imgLeft').src=state.logos.left||placeholderLeft;
+    byId('imgRight').src=state.logos.right||placeholderRight;
   }
 
   async function makePNG(){
@@ -294,9 +272,7 @@
     const rows=[['Eco','N° de VINS','N° Viaje','Status']];
     state.ops.forEach(r=>rows.push([r.eco,r.vins,r.viaje,r.status]));
     rows.push(['Programming', sumVins(), state.ops.length, '']);
-    rows.push([]);
-    rows.push(['Viajes a subir a sistema','','','']);
-    rows.push(['Eco','N° Viaje']);
+    rows.push([]); rows.push(['Viajes a subir a sistema','','','']); rows.push(['Eco','N° Viaje']);
     state.pend.forEach(r=>rows.push([r.eco,r.viaje]));
     const csv = rows.map(r=>r.map(x=>`"${String(x??'').replaceAll('"','""')}"`).join(',')).join('\n');
     download(csv,'text/csv',`TSC_Programming_${byId('fecha').value||'fecha'}.csv`);
