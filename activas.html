@@ -22,7 +22,6 @@
 <body class="bg-slate-950 text-slate-100">
 <main class="max-w-6xl mx-auto p-4 space-y-4">
 
-  <!-- Toolbar -->
   <section class="rounded-2xl border border-slate-800/70 bg-slate-900/60 p-4">
     <div id="head" class="text-sm"></div>
     <div class="mt-3 flex flex-wrap gap-2">
@@ -33,7 +32,6 @@
     </div>
   </section>
 
-  <!-- Tabla de Activas -->
   <section class="rounded-2xl border border-slate-800/70 bg-slate-900/60 p-4">
     <h2 class="text-sm font-semibold mb-2">Operaciones activas</h2>
     <div class="overflow-x-auto">
@@ -60,7 +58,6 @@
     </div>
   </section>
 
-  <!-- Hoja para PNG -->
   <section class="rounded-2xl border border-slate-800/70 bg-slate-900/60 p-4">
     <h3 class="text-sm font-semibold mb-2">Vista previa del reporte</h3>
     <div id="sheet" class="sheet">
@@ -82,9 +79,13 @@
   </section>
 </main>
 
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script>
-  const KEY_HEADER='tsc_monitor';
-  const KEY_ACTIVE='tsc_ops_active';
+  // === SUPABASE (tus datos) ===
+  const SUPABASE_URL = "https://xugajqlyvojqeciawpzj.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh1Z2FqcWx5dm9qcWVjaWF3cHpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE3NjM4MzksImV4cCI6MjA3NzMzOTgzOX0.tt2_6zqf9R0cGO6Fenx_FJO6sAg6jM_CYY1Peuq6Qyo";
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
   const STATUS_LIST=[
     "TRAYECTO A ASLA","EN TERMINAL PROCESO DE CARGA","SALIENDO DE TERMINAL CARGADO",
     "CARGADO EN RUTA FISCAL","POR MODULAR","TRAYECTO A PATIO DE DESCARGA","DESCARGADO 100%",
@@ -96,76 +97,104 @@
   const placeholderRight='data:image/svg+xml;utf8,'+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="240" height="80"><rect width="100%" height="100%" fill="#f59e0b"/><text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" font-family="Arial" font-weight="700" font-size="22" fill="#111827">CLIENTE</text></svg>`);
 
   const $=s=>document.querySelector(s), byId=id=>document.getElementById(id);
-
-  function loadHeader(){ try{ return JSON.parse(localStorage.getItem(KEY_HEADER))||{} } catch{ return {} } }
-  function loadActive(){ try{ return JSON.parse(localStorage.getItem(KEY_ACTIVE))||[] } catch{ return [] } }
-  function saveActive(arr){ localStorage.setItem(KEY_ACTIVE, JSON.stringify(arr)); }
+  function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
   function statusClass(s){ s=String(s||'').toUpperCase(); if(s.includes('DESCARGADO 100%')) return 'status-ok'; if(s.includes('VUELTA')) return 'status-2v'; return ''; }
 
-  function render(){
-    const h=loadHeader().header||{};
-    const ops=loadActive();
+  async function dbLoadHeader(){
+    const { data, error } = await sb.from('header').select('*').eq('id','dia').maybeSingle();
+    if(error && error.code!=='PGRST116') console.error(error);
+    return data || {};
+  }
+  async function dbLoadActive(){
+    const { data, error } = await sb.from('ops_active').select('*').order('created_at',{ascending:true});
+    if(error){ console.error(error); return [] }
+    return data || [];
+  }
+  async function dbUpdateStatus(id, status){
+    const { error } = await sb.from('ops_active').update({ status }).eq('id', id);
+    if(error) console.error(error);
+  }
+  async function dbDeleteOp(id){
+    const { error } = await sb.from('ops_active').delete().eq('id', id);
+    if(error) console.error(error);
+  }
+  async function dbClearAll(){
+    const { error } = await sb.from('ops_active').delete().neq('id','00000000-0000-0000-0000-000000000000');
+    if(error) console.error(error);
+  }
+
+  async function render(){
+    const h = await dbLoadHeader();
+    const ops = await dbLoadActive();
+
     byId('head').innerHTML=`Cliente: <b>${esc(h.cliente||'-')}</b> · Buque: <b>${esc(h.buque||'-')}</b> · Fecha: <b>${esc(h.fecha||'-')}</b>`;
     byId('metaCliente').textContent=h.cliente||'-'; byId('metaBuque').textContent=h.buque||'-'; byId('metaFecha').textContent=h.fecha||'-';
     byId('imgLeft').src=placeholderLeft; byId('imgRight').src=placeholderRight;
 
     const tb=byId('tb'); tb.innerHTML='';
-    let tv=0,tr=0;
-    ops.forEach((r,i)=>{
-      tv+=r.vins||0; tr++;
+    let tv=0,tr=ops.length;
+    ops.forEach((r)=>{
+      tv+=r.vins||0;
       const trEl=document.createElement('tr'); trEl.className='border-b border-slate-800';
       trEl.innerHTML=`<td class="px-3 py-2">${esc(r.eco)}</td>
         <td class="px-3 py-2 text-center">${r.vins??''}</td>
         <td class="px-3 py-2 text-center">${esc(r.viaje)}</td>
-        <td class="px-3 py-2">${statusSelect(r.status,i)}</td>
+        <td class="px-3 py-2">${statusSelect(r.status,r.id)}</td>
         <td class="px-3 py-2 text-center"><button class="text-rose-300 text-xs border border-rose-700 px-2 py-1 rounded" onclick="terminar('${r.id}')">Terminar</button></td>`;
       tb.appendChild(trEl);
     });
     byId('k-vins').textContent=tv; byId('k-viajes').textContent=tr;
 
-    // sheet
-    const sb=byId('sheetBody'); sb.innerHTML='';
+    const sbdy=byId('sheetBody'); sbdy.innerHTML='';
     ops.forEach(r=>{
       const row=document.createElement('tr');
       row.innerHTML=`<td>${esc(r.eco)}</td><td style="text-align:center">${r.vins??''}</td><td style="text-align:center">${esc(r.viaje)}</td><td class="${statusClass(r.status)}">${esc(r.status)}</td>`;
-      sb.appendChild(row);
+      sbdy.appendChild(row);
     });
     byId('sTotalVins').textContent=tv; byId('sTotalViajes').textContent=tr;
   }
 
-  function statusSelect(value, index){
-    const opts=STATUS_LIST.map(s=>`<option ${s===value?'selected':''}>${s}</option>`).join('');
-    return `<select class="px-2 py-1 rounded bg-slate-900 border border-slate-700 text-xs" onchange="updateStatus(${index}, this.value)">${opts}</select>`;
+  function statusSelect(value, id){
+    const opts=[
+      "TRAYECTO A ASLA","EN TERMINAL PROCESO DE CARGA","SALIENDO DE TERMINAL CARGADO",
+      "CARGADO EN RUTA FISCAL","POR MODULAR","TRAYECTO A PATIO DE DESCARGA","DESCARGADO 100%",
+      "1ER VUELTA","2DA VUELTA","3ER VUELTA","4TA VUELTA","5TA VUELTA",
+      "EN PATIO EN PROCESO DE DESCARGA","EN TRAYECTO A PATIO DE RESGUARDO","CARGADO EN PATIO DE RESGUARDO",
+      "TRAYECTO A TERMINAL","REGISTRADO EN ESPERA DE LLAMADO","EN TERMINAL EN ESPERA DE CARGA EN ASLA"
+    ].map(s=>`<option ${s===value?'selected':''}>${s}</option>`).join('');
+    return `<select class="px-2 py-1 rounded bg-slate-900 border border-slate-700 text-xs" onchange="updateStatus('${id}', this.value)">${opts}</select>`;
   }
 
-  function updateStatus(index, value){
-    const ops=loadActive(); if(!ops[index]) return; ops[index].status=value; saveActive(ops); render();
-  }
-  function terminar(id){
-    const ops=loadActive().filter(o=>o.id!==id); saveActive(ops); render();
-  }
-  function vaciar(){ if(confirm('¿Vaciar todas las activas?')){ saveActive([]); render(); } }
+  async function updateStatus(id, value){ await dbUpdateStatus(id, value); }
+  async function terminar(id){ await dbDeleteOp(id); }
+  async function vaciar(){ if(confirm('¿Vaciar todas las activas?')) await dbClearAll(); }
 
   function exportCSV(){
-    const h=loadHeader().header||{}; const ops=loadActive();
-    const rows=[['Eco','N° de VINS','N° Viaje','Status']];
-    ops.forEach(r=>rows.push([r.eco,r.vins,r.viaje,r.status]));
-    rows.push(['Programming', ops.reduce((a,b)=>a+(b.vins||0),0), ops.length, '']);
-    const csv=rows.map(r=>r.map(x=>`"${String(x??'').replaceAll('"','""')}"`).join(',')).join('\n');
-    const blob=new Blob([csv],{type:'text/csv'}); const url=URL.createObjectURL(blob);
-    const a=document.createElement('a'); a.href=url; a.download=`TSC_Programming_${h.fecha||'fecha'}.csv`; a.click();
-    setTimeout(()=>URL.revokeObjectURL(url),4000);
+    (async ()=>{
+      const h=await dbLoadHeader(); const ops=await dbLoadActive();
+      const rows=[['Eco','N° de VINS','N° Viaje','Status']];
+      ops.forEach(r=>rows.push([r.eco,r.vins,r.viaje,r.status]));
+      rows.push(['Programming', ops.reduce((a,b)=>a+(b.vins||0),0), ops.length, '']);
+      const csv=rows.map(r=>r.map(x=>`"${String(x??'').replaceAll('"','""')}"`).join(',')).join('\n');
+      const blob=new Blob([csv],{type:'text/csv'}); const url=URL.createObjectURL(blob);
+      const a=document.createElement('a'); a.href=url; a.download=`TSC_Programming_${h.fecha||'fecha'}.csv`; a.click();
+      setTimeout(()=>URL.revokeObjectURL(url),4000);
+    })();
   }
 
   async function makePNG(){
     const canvas=await html2canvas(document.getElementById('sheet'),{scale:2,backgroundColor:'#ffffff'});
-    const url=canvas.toDataURL('image/png'); const h=loadHeader().header||{};
+    const url=canvas.toDataURL('image/png'); const h=await dbLoadHeader();
     const a=document.createElement('a'); a.href=url; a.download=`TSC_Programming_${h.fecha||'fecha'}.png`; a.click();
   }
 
-  function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+  // Render inicial
+  render();
 
-  (function init(){ render(); })();
+  // Realtime
+  const channel = sb.channel('ops_active-realtime')
+    .on('postgres_changes', { event:'*', schema:'public', table:'ops_active' }, () => render())
+    .subscribe();
 </script>
 </body>
 </html>
