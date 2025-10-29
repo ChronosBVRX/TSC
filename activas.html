@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Operaciones Activas</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+<style>
+  .sheet{width:980px;background:#fff;color:#111827;border:1px solid #d1d5db;border-radius:6px;padding:14px;margin:auto}
+  .sheet .top{display:grid;grid-template-columns:1fr auto 1fr;align-items:center}
+  .sheet img.logo{height:58px;object-fit:contain}
+  .sheet h1{font-size:18px;margin:0;font-weight:800;text-align:center}
+  .sheet .meta{margin-top:6px;border:1px solid #d1d5db;padding:6px 10px;font-size:14px}
+  .sheet table{width:100%;border-collapse:collapse;margin-top:8px}
+  .sheet th,.sheet td{border:1px solid #d1d5db;padding:6px 8px;font-size:14px}
+  .sheet th{background:#eef2f7;text-align:center}
+  .status-ok{color:#065f46;font-weight:700}
+  .status-2v{color:#7a3b00;font-weight:700}
+  .totals td{background:#e8eef7;font-weight:700}
+</style>
+</head>
+<body class="bg-slate-950 text-slate-100">
+<main class="max-w-6xl mx-auto p-4 space-y-4">
+
+  <!-- Toolbar -->
+  <section class="rounded-2xl border border-slate-800/70 bg-slate-900/60 p-4">
+    <div id="head" class="text-sm"></div>
+    <div class="mt-3 flex flex-wrap gap-2">
+      <button class="px-3 py-2 text-xs rounded-lg border border-slate-700" onclick="exportCSV()">Exportar CSV</button>
+      <button class="px-3 py-2 text-xs rounded-lg bg-emerald-600 hover:bg-emerald-500 font-semibold" onclick="makePNG()">Generar PNG</button>
+      <a href="operacion.html" class="px-3 py-2 text-xs rounded-lg border border-slate-700">Agregar más</a>
+      <button class="px-3 py-2 text-xs rounded-lg border border-rose-700 text-rose-300" onclick="vaciar()">Vaciar Activas</button>
+    </div>
+  </section>
+
+  <!-- Tabla de Activas -->
+  <section class="rounded-2xl border border-slate-800/70 bg-slate-900/60 p-4">
+    <h2 class="text-sm font-semibold mb-2">Operaciones activas</h2>
+    <div class="overflow-x-auto">
+      <table class="min-w-full text-sm">
+        <thead>
+          <tr class="bg-slate-800 text-slate-300">
+            <th class="px-3 py-2 text-left">Eco</th>
+            <th class="px-3 py-2">VINS</th>
+            <th class="px-3 py-2">Viaje</th>
+            <th class="px-3 py-2 text-left">Status</th>
+            <th class="px-3 py-2">Terminar</th>
+          </tr>
+        </thead>
+        <tbody id="tb"></tbody>
+        <tfoot>
+          <tr class="border-t border-slate-800">
+            <th class="px-3 py-2 text-left">Totales</th>
+            <th id="k-vins" class="px-3 py-2 text-center">0</th>
+            <th id="k-viajes" class="px-3 py-2 text-center">0</th>
+            <th class="px-3 py-2" colspan="2"></th>
+          </tr>
+        </tfoot>
+      </table>
+    </div>
+  </section>
+
+  <!-- Hoja para PNG -->
+  <section class="rounded-2xl border border-slate-800/70 bg-slate-900/60 p-4">
+    <h3 class="text-sm font-semibold mb-2">Vista previa del reporte</h3>
+    <div id="sheet" class="sheet">
+      <div class="top">
+        <img id="imgLeft" class="logo" alt="Logo Izq">
+        <h1>PROGRAMMING OF THE DAY</h1>
+        <img id="imgRight" class="logo" alt="Logo Der">
+      </div>
+      <div class="meta">
+        <div><b>Cliente:</b> <span id="metaCliente">-</span> &nbsp;&nbsp; <b>Buque:</b> <span id="metaBuque">-</span></div>
+        <div><b>Date:</b> <span id="metaFecha">-</span></div>
+      </div>
+      <table>
+        <thead><tr><th>Eco</th><th>N° de VINS</th><th>N° Viaje</th><th>Status</th></tr></thead>
+        <tbody id="sheetBody"></tbody>
+        <tfoot><tr class="totals"><td><b>Programming</b></td><td id="sTotalVins">0</td><td id="sTotalViajes">0</td><td></td></tr></tfoot>
+      </table>
+    </div>
+  </section>
+</main>
+
+<script>
+  const KEY_HEADER='tsc_monitor';
+  const KEY_ACTIVE='tsc_ops_active';
+  const STATUS_LIST=[
+    "TRAYECTO A ASLA","EN TERMINAL PROCESO DE CARGA","SALIENDO DE TERMINAL CARGADO",
+    "CARGADO EN RUTA FISCAL","POR MODULAR","TRAYECTO A PATIO DE DESCARGA","DESCARGADO 100%",
+    "1ER VUELTA","2DA VUELTA","3ER VUELTA","4TA VUELTA","5TA VUELTA",
+    "EN PATIO EN PROCESO DE DESCARGA","EN TRAYECTO A PATIO DE RESGUARDO","CARGADO EN PATIO DE RESGUARDO",
+    "TRAYECTO A TERMINAL","REGISTRADO EN ESPERA DE LLAMADO","EN TERMINAL EN ESPERA DE CARGA EN ASLA"
+  ];
+  const placeholderLeft='data:image/svg+xml;utf8,'+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="240" height="80"><rect width="100%" height="100%" fill="#0ea5e9"/><text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" font-family="Arial" font-weight="700" font-size="22" fill="white">TSC LOGISTICS</text></svg>`);
+  const placeholderRight='data:image/svg+xml;utf8,'+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" width="240" height="80"><rect width="100%" height="100%" fill="#f59e0b"/><text x="50%" y="54%" dominant-baseline="middle" text-anchor="middle" font-family="Arial" font-weight="700" font-size="22" fill="#111827">CLIENTE</text></svg>`);
+
+  const $=s=>document.querySelector(s), byId=id=>document.getElementById(id);
+
+  function loadHeader(){ try{ return JSON.parse(localStorage.getItem(KEY_HEADER))||{} } catch{ return {} } }
+  function loadActive(){ try{ return JSON.parse(localStorage.getItem(KEY_ACTIVE))||[] } catch{ return [] } }
+  function saveActive(arr){ localStorage.setItem(KEY_ACTIVE, JSON.stringify(arr)); }
+  function statusClass(s){ s=String(s||'').toUpperCase(); if(s.includes('DESCARGADO 100%')) return 'status-ok'; if(s.includes('VUELTA')) return 'status-2v'; return ''; }
+
+  function render(){
+    const h=loadHeader().header||{};
+    const ops=loadActive();
+    byId('head').innerHTML=`Cliente: <b>${esc(h.cliente||'-')}</b> · Buque: <b>${esc(h.buque||'-')}</b> · Fecha: <b>${esc(h.fecha||'-')}</b>`;
+    byId('metaCliente').textContent=h.cliente||'-'; byId('metaBuque').textContent=h.buque||'-'; byId('metaFecha').textContent=h.fecha||'-';
+    byId('imgLeft').src=placeholderLeft; byId('imgRight').src=placeholderRight;
+
+    const tb=byId('tb'); tb.innerHTML='';
+    let tv=0,tr=0;
+    ops.forEach((r,i)=>{
+      tv+=r.vins||0; tr++;
+      const trEl=document.createElement('tr'); trEl.className='border-b border-slate-800';
+      trEl.innerHTML=`<td class="px-3 py-2">${esc(r.eco)}</td>
+        <td class="px-3 py-2 text-center">${r.vins??''}</td>
+        <td class="px-3 py-2 text-center">${esc(r.viaje)}</td>
+        <td class="px-3 py-2">${statusSelect(r.status,i)}</td>
+        <td class="px-3 py-2 text-center"><button class="text-rose-300 text-xs border border-rose-700 px-2 py-1 rounded" onclick="terminar('${r.id}')">Terminar</button></td>`;
+      tb.appendChild(trEl);
+    });
+    byId('k-vins').textContent=tv; byId('k-viajes').textContent=tr;
+
+    // sheet
+    const sb=byId('sheetBody'); sb.innerHTML='';
+    ops.forEach(r=>{
+      const row=document.createElement('tr');
+      row.innerHTML=`<td>${esc(r.eco)}</td><td style="text-align:center">${r.vins??''}</td><td style="text-align:center">${esc(r.viaje)}</td><td class="${statusClass(r.status)}">${esc(r.status)}</td>`;
+      sb.appendChild(row);
+    });
+    byId('sTotalVins').textContent=tv; byId('sTotalViajes').textContent=tr;
+  }
+
+  function statusSelect(value, index){
+    const opts=STATUS_LIST.map(s=>`<option ${s===value?'selected':''}>${s}</option>`).join('');
+    return `<select class="px-2 py-1 rounded bg-slate-900 border border-slate-700 text-xs" onchange="updateStatus(${index}, this.value)">${opts}</select>`;
+  }
+
+  function updateStatus(index, value){
+    const ops=loadActive(); if(!ops[index]) return; ops[index].status=value; saveActive(ops); render();
+  }
+  function terminar(id){
+    const ops=loadActive().filter(o=>o.id!==id); saveActive(ops); render();
+  }
+  function vaciar(){ if(confirm('¿Vaciar todas las activas?')){ saveActive([]); render(); } }
+
+  function exportCSV(){
+    const h=loadHeader().header||{}; const ops=loadActive();
+    const rows=[['Eco','N° de VINS','N° Viaje','Status']];
+    ops.forEach(r=>rows.push([r.eco,r.vins,r.viaje,r.status]));
+    rows.push(['Programming', ops.reduce((a,b)=>a+(b.vins||0),0), ops.length, '']);
+    const csv=rows.map(r=>r.map(x=>`"${String(x??'').replaceAll('"','""')}"`).join(',')).join('\n');
+    const blob=new Blob([csv],{type:'text/csv'}); const url=URL.createObjectURL(blob);
+    const a=document.createElement('a'); a.href=url; a.download=`TSC_Programming_${h.fecha||'fecha'}.csv`; a.click();
+    setTimeout(()=>URL.revokeObjectURL(url),4000);
+  }
+
+  async function makePNG(){
+    const canvas=await html2canvas(document.getElementById('sheet'),{scale:2,backgroundColor:'#ffffff'});
+    const url=canvas.toDataURL('image/png'); const h=loadHeader().header||{};
+    const a=document.createElement('a'); a.href=url; a.download=`TSC_Programming_${h.fecha||'fecha'}.png`; a.click();
+  }
+
+  function esc(s){return String(s??'').replace(/[&<>"']/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]))}
+
+  (function init(){ render(); })();
+</script>
+</body>
+</html>
