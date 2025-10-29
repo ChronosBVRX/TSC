@@ -8,22 +8,63 @@
 <body class="bg-slate-950 text-slate-100">
 <main class="max-w-3xl mx-auto p-4 space-y-4">
 
+  <!-- Encabezado del día -->
   <section class="rounded-2xl border border-slate-800/70 bg-slate-900/60 p-4">
     <h2 class="text-sm font-semibold mb-3">Encabezado del día</h2>
+
     <div class="grid md:grid-cols-3 gap-3">
-      <label class="text-xs grid gap-1"><span>Cliente</span><input id="cliente" class="px-3 py-2 rounded-lg bg-slate-900 border border-slate-700" value="FORD"/></label>
-      <label class="text-xs grid gap-1"><span>Buque</span><input id="buque" class="px-3 py-2 rounded-lg bg-slate-900 border border-slate-700" placeholder="LAPIS ARROW"/></label>
-      <label class="text-xs grid gap-1"><span>Fecha</span><input id="fecha" type="date" class="px-3 py-2 rounded-lg bg-slate-900 border border-slate-700"/></label>
+      <label class="text-xs grid gap-1"><span>Cliente</span>
+        <input id="cliente" class="px-3 py-2 rounded-lg bg-slate-900 border border-slate-700" value="FORD"/>
+      </label>
+      <label class="text-xs grid gap-1"><span>Buque</span>
+        <input id="buque" class="px-3 py-2 rounded-lg bg-slate-900 border border-slate-700" placeholder="LAPIS ARROW"/>
+      </label>
+      <label class="text-xs grid gap-1"><span>Fecha</span>
+        <input id="fecha" type="date" class="px-3 py-2 rounded-lg bg-slate-900 border border-slate-700"/>
+      </label>
     </div>
-    <p class="mt-2 text-[11px] text-slate-400">Este encabezado se usará en el reporte (PNG/CSV) desde la pestaña <b>Activas</b>.</p>
+
+    <!-- Selector de transportista (logo derecho) -->
+    <div class="mt-3 grid md:grid-cols-3 gap-3 items-end">
+      <div class="text-xs">
+        <div class="mb-1">Logo izquierdo (fijo)</div>
+        <div class="flex items-center gap-2">
+          <img id="prev-left" class="h-10 rounded border border-slate-700" alt="TSC">
+          <span class="text-[11px] text-slate-400">TSC siempre va a la izquierda</span>
+        </div>
+      </div>
+      <label class="text-xs grid gap-1">
+        <span>Logo derecho (transportista)</span>
+        <select id="transportista" class="px-3 py-2 rounded-lg bg-slate-900 border border-slate-700">
+          <option value="">— Ninguno —</option>
+          <option value="HADRON">HADRON</option>
+          <option value="RAPIDOS">RÁPIDOS</option>
+        </select>
+      </label>
+      <div class="text-xs">
+        <div class="mb-1">Vista previa (derecha)</div>
+        <img id="prev-right" class="h-10 rounded border border-slate-700" alt="Transportista">
+      </div>
+    </div>
+
+    <p class="mt-2 text-[11px] text-slate-400">
+      El logo de TSC se coloca a la izquierda en la imagen PNG. A la derecha irá el transportista elegido (HADRON o RÁPIDOS).
+    </p>
   </section>
 
+  <!-- Alta de operación -->
   <section class="rounded-2xl border border-slate-800/70 bg-slate-900/60 p-4">
     <h2 class="text-sm font-semibold mb-3">Agregar operación</h2>
     <div class="grid md:grid-cols-5 gap-3">
-      <label class="text-xs grid gap-1"><span>Eco</span><input id="eco" class="px-3 py-2 rounded-lg bg-slate-900 border border-slate-700" placeholder="17017 / M1"/></label>
-      <label class="text-xs grid gap-1"><span>N° de VINS</span><input id="vins" type="number" value="9" min="0" class="px-3 py-2 rounded-lg bg-slate-900 border border-slate-700"/></label>
-      <label class="text-xs grid gap-1"><span>N° de Viaje</span><input id="viaje" class="px-3 py-2 rounded-lg bg-slate-900 border border-slate-700" placeholder="MED-01"/></label>
+      <label class="text-xs grid gap-1"><span>Eco</span>
+        <input id="eco" class="px-3 py-2 rounded-lg bg-slate-900 border border-slate-700" placeholder="17017 / M1"/>
+      </label>
+      <label class="text-xs grid gap-1"><span>N° de VINS</span>
+        <input id="vins" type="number" value="9" min="0" class="px-3 py-2 rounded-lg bg-slate-900 border border-slate-700"/>
+      </label>
+      <label class="text-xs grid gap-1"><span>N° de Viaje</span>
+        <input id="viaje" class="px-3 py-2 rounded-lg bg-slate-900 border border-slate-700" placeholder="MED-01"/>
+      </label>
       <label class="text-xs grid gap-1"><span>Status</span>
         <select id="status" class="px-3 py-2 rounded-lg bg-slate-900 border border-slate-700">
           <option>TRAYECTO A ASLA</option>
@@ -61,18 +102,46 @@
 <!-- Supabase -->
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script>
-  // === SUPABASE (tus datos) ===
+  // SUPABASE
   const SUPABASE_URL = "https://xugajqlyvojqeciawpzj.supabase.co";
   const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh1Z2FqcWx5dm9qcWVjaWF3cHpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE3NjM4MzksImV4cCI6MjA3NzMzOTgzOX0.tt2_6zqf9R0cGO6Fenx_FJO6sAg6jM_CYY1Peuq6Qyo";
   const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+  // Logos (usar RAW de GitHub)
+  const LOGO_LEFT_TSC = "https://raw.githubusercontent.com/ChronosBVRX/TSC/main/Imagen%20de%20WhatsApp%202025-10-29%20a%20las%2013.29.51_292c634c.jpg";
+  const LOGO_RIGHT = {
+    "": "",
+    "HADRON": "https://raw.githubusercontent.com/ChronosBVRX/TSC/main/hadron.jpg",
+    "RAPIDOS": "https://raw.githubusercontent.com/ChronosBVRX/TSC/main/RAPIDOS-DE-MICHOACAN-1.jpg"
+  };
+
+  const $ = s => document.querySelector(s);
   const byId=id=>document.getElementById(id);
 
   (async ()=>{
+    // Fecha + carga de header
     byId('fecha').value=new Date().toISOString().slice(0,10);
+    $('#prev-left').src = LOGO_LEFT_TSC;
+
     const h = await dbLoadHeader();
-    if(h){ byId('cliente').value=h.cliente||''; byId('buque').value=h.buque||''; byId('fecha').value=h.fecha||byId('fecha').value; }
+    if(h){
+      byId('cliente').value = h.cliente || '';
+      byId('buque').value   = h.buque || '';
+      byId('fecha').value   = h.fecha || byId('fecha').value;
+      byId('transportista').value = h.transportista || '';
+      updateRightPreview();
+    } else {
+      updateRightPreview();
+    }
+
+    $('#transportista').addEventListener('change', updateRightPreview);
   })();
+
+  function updateRightPreview(){
+    const sel = byId('transportista').value || '';
+    const url = LOGO_RIGHT[sel] || '';
+    $('#prev-right').src = url || '';
+  }
 
   async function dbLoadHeader(){
     const { data, error } = await sb.from('header').select('*').eq('id','dia').maybeSingle();
@@ -95,12 +164,18 @@
           status=byId('status').value;
     if(!eco||!viaje){ alert('Eco y N° de Viaje son obligatorios'); return; }
 
+    // Guardar encabezado con logos
+    const transportista = byId('transportista').value || '';
+    const logo_right_url = LOGO_RIGHT[transportista] || '';
     await dbSaveHeader({
       cliente: byId('cliente').value,
       buque: byId('buque').value,
-      fecha: byId('fecha').value
+      fecha: byId('fecha').value,
+      transportista,
+      logo_right_url
     });
 
+    // Guardar operación
     await dbAddOp({ eco, vins, viaje, status });
 
     byId('eco').value=''; byId('viaje').value='';
