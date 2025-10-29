@@ -1,95 +1,39 @@
 <!doctype html>
 <html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Monitoreo</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Monitoreo</title>
+<script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-950 text-slate-100">
-  <main class="mx-auto flex max-w-5xl flex-col gap-6 px-4 py-6">
-    <header>
-      <h1 class="text-2xl font-semibold">Monitoreo</h1>
-      <p class="text-sm text-slate-400">Visualización de telemetría y status en campo.</p>
-    </header>
+<main class="max-w-6xl mx-auto p-4 space-y-4">
+  <section class="rounded-2xl border border-slate-800/70 bg-slate-900/60 p-4">
+    <h2 class="text-sm font-semibold mb-3">Panel de Monitoreo</h2>
+    <div class="grid md:grid-cols-2 gap-3">
+      <label class="text-xs grid gap-1">
+        <span>URL del sistema GPS / tracking</span>
+        <input id="url" class="px-3 py-2 rounded-lg bg-slate-900 border border-slate-700" placeholder="https://...">
+      </label>
+      <div class="flex items-end gap-2">
+        <button class="px-3 py-2 text-xs rounded-lg bg-cyan-600 hover:bg-cyan-500" onclick="load()">Cargar</button>
+        <button class="px-3 py-2 text-xs rounded-lg border border-slate-700" onclick="openNew()">Abrir en ventana</button>
+      </div>
+    </div>
+    <p class="mt-2 text-[11px] text-slate-400">La página debe permitir ser embebida (CSP/Frame-Ancestors).</p>
+  </section>
 
-    <section class="grid gap-4 md:grid-cols-[2fr_1fr]">
-      <div class="rounded-xl border border-slate-800 bg-slate-900 p-4">
-        <h2 class="text-sm font-semibold">Mapa / Tracking</h2>
-        <div class="mt-2 aspect-video overflow-hidden rounded-lg border border-slate-800 bg-slate-900">
-          <iframe src="about:blank" class="h-full w-full" sandbox="allow-same-origin allow-scripts allow-forms allow-popups"></iframe>
-        </div>
-      </div>
-      <div class="rounded-xl border border-slate-800 bg-slate-900 p-4">
-        <h2 class="text-sm font-semibold">KPIs</h2>
-        <ul class="mt-2 grid grid-cols-2 gap-3 text-sm">
-          <li class="rounded-lg border border-slate-800 bg-slate-900 p-3">
-            <div class="text-slate-400">Activas</div>
-            <div class="text-2xl font-semibold">12</div>
-          </li>
-          <li class="rounded-lg border border-slate-800 bg-slate-900 p-3">
-            <div class="text-slate-400">En ruta</div>
-            <div class="text-2xl font-semibold">9</div>
-          </li>
-          <li class="rounded-lg border border-slate-800 bg-slate-900 p-3">
-            <div class="text-slate-400">Retrasos</div>
-            <div class="text-2xl font-semibold text-amber-300">3</div>
-          </li>
-          <li class="rounded-lg border border-slate-800 bg-slate-900 p-3">
-            <div class="text-slate-400">Alertas</div>
-            <div class="text-2xl font-semibold text-rose-400">1</div>
-          </li>
-        </ul>
-      </div>
-    </section>
+  <section class="rounded-2xl border border-slate-800/70 bg-slate-900/60 p-4">
+    <div class="h-[65vh] overflow-hidden rounded-xl border border-slate-800">
+      <iframe id="frame" class="w-full h-full" referrerpolicy="no-referrer" sandbox="allow-same-origin allow-scripts allow-forms allow-popups"></iframe>
+    </div>
+  </section>
+</main>
 
-    <section class="rounded-xl border border-slate-800 bg-slate-900 p-4">
-      <div class="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
-        <div>
-          <h2 class="text-lg font-semibold">Eventos recientes</h2>
-          <p class="text-sm text-slate-400">Bitácora en vivo de alertas y movimientos.</p>
-        </div>
-        <button class="rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-xs font-semibold text-slate-200 transition hover:border-cyan-400 hover:bg-cyan-400/10">Exportar</button>
-      </div>
-      <div class="mt-4 overflow-x-auto">
-        <table class="min-w-full text-left text-sm">
-          <thead class="text-slate-400">
-            <tr>
-              <th class="px-3 py-2">Hora</th>
-              <th class="px-3 py-2">Unidad</th>
-              <th class="px-3 py-2">Evento</th>
-              <th class="px-3 py-2">Estado</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-slate-800">
-            <tr>
-              <td class="px-3 py-2">08:14</td>
-              <td class="px-3 py-2">014</td>
-              <td class="px-3 py-2">Cruce caseta Tepotzotlán</td>
-              <td class="px-3 py-2 text-emerald-300">OK</td>
-            </tr>
-            <tr>
-              <td class="px-3 py-2">08:37</td>
-              <td class="px-3 py-2">017</td>
-              <td class="px-3 py-2">Variación de velocidad</td>
-              <td class="px-3 py-2 text-amber-300">Revisar</td>
-            </tr>
-            <tr>
-              <td class="px-3 py-2">08:52</td>
-              <td class="px-3 py-2">021</td>
-              <td class="px-3 py-2">Ingreso a punto seguro</td>
-              <td class="px-3 py-2 text-emerald-300">OK</td>
-            </tr>
-            <tr>
-              <td class="px-3 py-2">09:05</td>
-              <td class="px-3 py-2">034</td>
-              <td class="px-3 py-2">Alerta de combustible</td>
-              <td class="px-3 py-2 text-rose-400">Atención</td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </section>
-  </main>
+<script>
+  const urlInput=document.getElementById('url'); const frame=document.getElementById('frame');
+  function load(){ const u=urlInput.value.trim(); if(!u) return; frame.src=u+(u.includes('?')?'&':'?')+'ts='+Date.now(); localStorage.setItem('mon_url',u); }
+  function openNew(){ const u=urlInput.value.trim(); if(u) window.open(u,'_blank','noopener'); }
+  (function init(){ const u=localStorage.getItem('mon_url'); if(u){ urlInput.value=u; load(); }})();
+</script>
 </body>
 </html>
