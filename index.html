@@ -72,8 +72,10 @@
   </main>
 
   <script>
-    const VALID_EMAIL = "Monitor@TSC.com";
-    const VALID_HASH = "WMpuIG2Kaatbz1D9230zzEFx5JyCZCMi32HMeC8sSs8";
+    const STATIC_AUTH = {
+      user: "Monitor@TSC.com",
+      pass_hash: "WMpuIG2Kaatbz1D9230zzEFx5JyCZCMi32HMeC8sSs8"
+    };
     const STORAGE_KEY = "tsc-monitor-session";
 
     const loginView = document.getElementById("login-view");
@@ -123,7 +125,7 @@
 
       try {
         const hashed = await hashPassword(password);
-        if (email === VALID_EMAIL && hashed === VALID_HASH) {
+        if (email === STATIC_AUTH.user && hashed === STATIC_AUTH.pass_hash) {
           localStorage.setItem(STORAGE_KEY, "1");
           toggleAppView(true);
         } else {
