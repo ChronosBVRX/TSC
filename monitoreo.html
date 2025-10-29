@@ -2,38 +2,128 @@
 <html lang="es">
 <head>
 <meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Monitoreo</title>
+<title>Monitoreo · Zeek GPS</title>
 <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-slate-950 text-slate-100">
-<main class="max-w-6xl mx-auto p-4 space-y-4">
+<main class="max-w-3xl mx-auto p-4 space-y-4">
   <section class="rounded-2xl border border-slate-800/70 bg-slate-900/60 p-4">
-    <h2 class="text-sm font-semibold mb-3">Panel de Monitoreo</h2>
-    <div class="grid md:grid-cols-2 gap-3">
+    <h1 class="text-sm font-semibold mb-3">Zeek Mi Auto – Acceso</h1>
+
+    <div class="grid md:grid-cols-3 gap-3">
       <label class="text-xs grid gap-1">
-        <span>URL del sistema GPS / tracking</span>
-        <input id="url" class="px-3 py-2 rounded-lg bg-slate-900 border border-slate-700" placeholder="https://...">
+        <span>URL</span>
+        <input id="url" class="px-3 py-2 rounded-lg bg-slate-900 border border-slate-700"
+               value="https://auto.zeekgps.com/zma/">
       </label>
-      <div class="flex items-end gap-2">
-        <button class="px-3 py-2 text-xs rounded-lg bg-cyan-600 hover:bg-cyan-500" onclick="load()">Cargar</button>
-        <button class="px-3 py-2 text-xs rounded-lg border border-slate-700" onclick="openNew()">Abrir en ventana</button>
+      <label class="text-xs grid gap-1">
+        <span>Usuario</span>
+        <input id="user" class="px-3 py-2 rounded-lg bg-slate-900 border border-slate-700"
+               value="admid.geren@tsclogisticmx.com">
+      </label>
+      <label class="text-xs grid gap-1">
+        <span>Contraseña</span>
+        <input id="pass" class="px-3 py-2 rounded-lg bg-slate-900 border border-slate-700"
+               value="Tsc123321">
+      </label>
+    </div>
+
+    <div class="mt-3 flex flex-wrap gap-2">
+      <button class="px-3 py-2 text-xs rounded-lg bg-emerald-600 hover:bg-emerald-500" onclick="openSameTab()">Abrir en esta pestaña</button>
+      <button class="px-3 py-2 text-xs rounded-lg bg-cyan-600 hover:bg-cyan-500" onclick="openZeek()">Abrir en nueva pestaña</button>
+      <button class="px-3 py-2 text-xs rounded-lg border border-slate-700" onclick="showBookmarklet()">Mostrar bookmarklet</button>
+      <button class="px-3 py-2 text-xs rounded-lg border border-slate-700" onclick="copyBookmarklet()">Copiar bookmarklet</button>
+    </div>
+
+    <p class="mt-2 text-[11px] text-slate-400">
+      Si el embebido es bloqueado por el sitio, usa <b>Abrir en esta pestaña</b> o el <b>bookmarklet</b> para autologin en la página de Zeek.
+    </p>
+
+    <div id="bm-wrap" class="mt-3 hidden">
+      <div class="rounded-lg border border-slate-800 p-3">
+        <p class="text-xs mb-2">Arrastra este botón a tu barra de marcadores y, en el login de Zeek, haz clic:</p>
+        <a id="bm-link" class="inline-flex items-center gap-2 rounded-lg px-3 py-2 text-xs bg-emerald-600 hover:bg-emerald-500 font-semibold"
+           href="#">Zeek · Autologin</a>
       </div>
     </div>
-    <p class="mt-2 text-[11px] text-slate-400">La página debe permitir ser embebida (CSP/Frame-Ancestors).</p>
   </section>
 
   <section class="rounded-2xl border border-slate-800/70 bg-slate-900/60 p-4">
+    <h2 class="text-sm font-semibold mb-2">Vista previa (puede estar bloqueada por CSP)</h2>
     <div class="h-[65vh] overflow-hidden rounded-xl border border-slate-800">
-      <iframe id="frame" class="w-full h-full" referrerpolicy="no-referrer" sandbox="allow-same-origin allow-scripts allow-forms allow-popups"></iframe>
+      <iframe id="frame" class="w-full h-full" referrerpolicy="no-referrer"
+              sandbox="allow-same-origin allow-scripts allow-forms allow-popups"></iframe>
+    </div>
+    <div class="mt-2 flex gap-2">
+      <button class="px-3 py-2 text-xs rounded-lg border border-slate-700" onclick="loadIframe()">Cargar en iFrame</button>
     </div>
   </section>
 </main>
 
 <script>
-  const urlInput=document.getElementById('url'); const frame=document.getElementById('frame');
-  function load(){ const u=urlInput.value.trim(); if(!u) return; frame.src=u+(u.includes('?')?'&':'?')+'ts='+Date.now(); localStorage.setItem('mon_url',u); }
-  function openNew(){ const u=urlInput.value.trim(); if(u) window.open(u,'_blank','noopener'); }
-  (function init(){ const u=localStorage.getItem('mon_url'); if(u){ urlInput.value=u; load(); }})();
+  const $ = (s)=>document.querySelector(s);
+
+  // Abrir ZEEK en la misma pestaña (reemplaza al Index) — requiere el sandbox con allow-top-navigation-by-user-activation en index.html
+  function openSameTab(){
+    const url = $('#url').value.trim() || 'https://auto.zeekgps.com/zma/';
+    window.top.location.href = url;
+  }
+
+  function openZeek(){
+    const url = $('#url').value.trim();
+    if(!url) return;
+    window.open(url, '_blank', 'noopener');
+  }
+
+  function loadIframe(){
+    const url = $('#url').value.trim();
+    if(!url) return;
+    const f = $('#frame');
+    f.src = url + (url.includes('?')?'&':'?')+'ts='+Date.now();
+  }
+
+  function bookmarkletCode(){
+    const U = encodeURIComponent($('#user').value);
+    const P = encodeURIComponent($('#pass').value);
+    const js = `
+      (function(){
+        try{
+          var U=decodeURIComponent('${U}'), P=decodeURIComponent('${P}');
+          function findEmail(){
+            var xs=document.querySelectorAll('input[type=email],input[type=text]');
+            for(var i=0;i<xs.length;i++){
+              var el=xs[i], n=(el.name||'').toLowerCase(), p=(el.placeholder||'').toLowerCase(), id=(el.id||'').toLowerCase();
+              if(n.includes('user')||n.includes('email')||p.includes('usuario')||p.includes('correo')||id.includes('user')||id.includes('email')) return el;
+            }
+            return xs[0]||null;
+          }
+          function findPass(){ return document.querySelector('input[type=password]'); }
+          var e=findEmail(), p=findPass();
+          if(e){ e.focus(); e.value=U; e.dispatchEvent(new Event('input',{bubbles:true})); }
+          if(p){ p.focus(); p.value=P; p.dispatchEvent(new Event('input',{bubbles:true})); }
+          var form = (e && e.form) || (p && p.form) || document.querySelector('form');
+          if(form){ form.requestSubmit ? form.requestSubmit() : form.submit(); }
+        }catch(err){ alert('Autologin no pudo ejecutarse: '+err.message); }
+      })();
+    `.replace(/\n|\s{2,}/g,' ');
+    return 'javascript:' + encodeURIComponent(js);
+  }
+
+  function showBookmarklet(){
+    const link = $('#bm-link');
+    link.href = bookmarkletCode();
+    $('#bm-wrap').classList.remove('hidden');
+  }
+
+  function copyBookmarklet(){
+    const code = bookmarkletCode();
+    navigator.clipboard.writeText(code).then(()=>{
+      alert('Bookmarklet copiado. Crea un marcador nuevo y pega el código como URL.');
+    },()=> alert('No se pudo copiar. Intenta manualmente.'));
+  }
+
+  // Carga inicial de iFrame (opcional)
+  loadIframe();
 </script>
 </body>
 </html>
