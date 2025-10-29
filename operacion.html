@@ -58,38 +58,54 @@
   </section>
 </main>
 
+<!-- Supabase -->
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script>
+  // === SUPABASE (tus datos) ===
+  const SUPABASE_URL = "https://xugajqlyvojqeciawpzj.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh1Z2FqcWx5dm9qcWVjaWF3cHpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE3NjM4MzksImV4cCI6MjA3NzMzOTgzOX0.tt2_6zqf9R0cGO6Fenx_FJO6sAg6jM_CYY1Peuq6Qyo";
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
   const byId=id=>document.getElementById(id);
-  const KEY_HEADER='tsc_monitor';      // guarda header {header:{...}}
-  const KEY_ACTIVE='tsc_ops_active';   // array de operaciones activas
 
-  (()=>{ byId('fecha').value=new Date().toISOString().slice(0,10); loadHeader(); })();
+  (async ()=>{
+    byId('fecha').value=new Date().toISOString().slice(0,10);
+    const h = await dbLoadHeader();
+    if(h){ byId('cliente').value=h.cliente||''; byId('buque').value=h.buque||''; byId('fecha').value=h.fecha||byId('fecha').value; }
+  })();
 
-  function addOp(){
-    const eco=byId('eco').value.trim(), vins=parseInt(byId('vins').value||'0',10),
-          viaje=byId('viaje').value.trim(), status=byId('status').value;
+  async function dbLoadHeader(){
+    const { data, error } = await sb.from('header').select('*').eq('id','dia').maybeSingle();
+    if(error && error.code!=='PGRST116') console.error(error);
+    return data || null;
+  }
+  async function dbSaveHeader(h){
+    const { error } = await sb.from('header').upsert({ id:'dia', ...h });
+    if(error) console.error(error);
+  }
+  async function dbAddOp(op){
+    const { error } = await sb.from('ops_active').insert(op);
+    if(error) alert('Error al guardar: '+error.message);
+  }
+
+  async function addOp(){
+    const eco=byId('eco').value.trim(),
+          vins=parseInt(byId('vins').value||'0',10),
+          viaje=byId('viaje').value.trim(),
+          status=byId('status').value;
     if(!eco||!viaje){ alert('Eco y N° de Viaje son obligatorios'); return; }
 
-    // Guarda/actualiza encabezado del día
-    const payload={ header:{ cliente:byId('cliente').value, buque:byId('buque').value, fecha:byId('fecha').value } };
-    localStorage.setItem(KEY_HEADER, JSON.stringify(Object.assign(loadHeader()||{}, payload)));
+    await dbSaveHeader({
+      cliente: byId('cliente').value,
+      buque: byId('buque').value,
+      fecha: byId('fecha').value
+    });
 
-    // Agrega a Activas
-    const ops = loadActive();
-    ops.push({ id: crypto.randomUUID?.() || String(Date.now())+Math.random().toString(16).slice(2),
-               eco, vins, viaje, status, createdAt: Date.now() });
-    localStorage.setItem(KEY_ACTIVE, JSON.stringify(ops));
+    await dbAddOp({ eco, vins, viaje, status });
 
-    // Limpia campos y muestra aviso
     byId('eco').value=''; byId('viaje').value='';
     const msg=byId('last-msg'); msg.classList.remove('hidden'); setTimeout(()=>msg.classList.add('hidden'), 1800);
   }
-
-  function loadHeader(){ try{ const raw=localStorage.getItem(KEY_HEADER); const d=raw?JSON.parse(raw):null;
-      if(d?.header){ byId('cliente').value=d.header.cliente||''; byId('buque').value=d.header.buque||''; byId('fecha').value=d.header.fecha||byId('fecha').value; }
-      return d;
-    }catch{ return null } }
-  function loadActive(){ try{ return JSON.parse(localStorage.getItem(KEY_ACTIVE))||[] } catch{ return [] } }
 </script>
 </body>
 </html>
