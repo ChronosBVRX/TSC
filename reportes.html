@@ -25,9 +25,9 @@
       </div>
     </div>
     <div class="mt-3 flex gap-2">
-      <a id="btn-ir-operacion" href="operacion.html" target="_blank" class="px-3 py-2 text-xs rounded-lg border border-slate-700">Editar datos</a>
+      <a href="operacion.html" target="_blank" class="px-3 py-2 text-xs rounded-lg border border-slate-700">Editar datos</a>
       <button id="btn-exportar" class="px-3 py-2 text-xs rounded-lg border border-slate-700">Exportar CSV</button>
-      <button id="btn-imagen" class="px-3 py-2 text-xs rounded-lg bg-emerald-600 hover:bg-emerald-500 font-semibold">Generar PNG (abrirá Operación)</button>
+      <button id="btn-imagen" class="px-3 py-2 text-xs rounded-lg bg-emerald-600 hover:bg-emerald-500 font-semibold">Generar PNG (abre Activas)</button>
     </div>
   </section>
 
@@ -49,41 +49,42 @@
   </section>
 </main>
 
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script>
-  function load(){ const raw=localStorage.getItem('tsc_monitor'); return raw?JSON.parse(raw):null }
-  function esc(s){return String(s??'')}
-  function csv(d){
-    const rows=[['Eco','N° de VINS','N° Viaje','Status']];
-    d.ops.forEach(r=>rows.push([r.eco,r.vins,r.viaje,r.status]));
-    rows.push(['Programming',d.ops.reduce((a,b)=>a+(b.vins||0),0),d.ops.length,'']);
-    rows.push([]); rows.push(['Viajes a subir a sistema']); rows.push(['Eco','N° Viaje']);
-    (d.pend||[]).forEach(r=>rows.push([r.eco,r.viaje]));
-    return rows.map(r=>r.map(x=>`"${String(x??'').replaceAll('"','""')}"`).join(',')).join('\n');
-  }
-  (function init(){
-    const d=load(); if(!d){document.getElementById('head').textContent='No hay datos guardados.'; return}
-    document.getElementById('head').textContent=`Cliente: ${d.header?.cliente||'-'} · Buque: ${d.header?.buque||'-'} · Fecha: ${d.header?.fecha||'-'}`;
-    document.getElementById('k-viajes').textContent=d.ops?.length||0;
-    document.getElementById('k-vins').textContent=(d.ops||[]).reduce((a,b)=>a+(b.vins||0),0);
-    document.getElementById('k-pend').textContent=d.pend?.length||0;
+  const SUPABASE_URL = "https://xugajqlyvojqeciawpzj.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh1Z2FqcWx5dm9qcWVjaWF3cHpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE3NjM4MzksImV4cCI6MjA3NzMzOTgzOX0.tt2_6zqf9R0cGO6Fenx_FJO6sAg6jM_CYY1Peuq6Qyo";
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+  async function loadHeader(){ const {data}=await sb.from('header').select('*').eq('id','dia').maybeSingle(); return data||{}; }
+  async function loadOps(){ const {data}=await sb.from('ops_active').select('*').order('created_at',{ascending:true}); return data||[]; }
+
+  (async function init(){
+    const h=await loadHeader(); const ops=await loadOps();
+    document.getElementById('head').textContent=`Cliente: ${h.cliente||'-'} · Buque: ${h.buque||'-'} · Fecha: ${h.fecha||'-'}`;
+    document.getElementById('k-viajes').textContent=ops.length;
+    document.getElementById('k-vins').textContent=ops.reduce((a,b)=>a+(b.vins||0),0);
+    document.getElementById('k-pend').textContent=0;
 
     const tb=document.getElementById('tb'); tb.innerHTML='';
-    (d.ops||[]).forEach(r=>{
+    ops.forEach(r=>{
       const tr=document.createElement('tr'); tr.className='border-b border-slate-800';
-      tr.innerHTML=`<td class="px-3 py-2">${esc(r.eco)}</td>
+      tr.innerHTML=`<td class="px-3 py-2">${r.eco}</td>
       <td class="px-3 py-2 text-center">${r.vins??''}</td>
-      <td class="px-3 py-2 text-center">${esc(r.viaje)}</td>
-      <td class="px-3 py-2">${esc(r.status)}</td>`;
+      <td class="px-3 py-2 text-center">${r.viaje}</td>
+      <td class="px-3 py-2">${r.status}</td>`;
       tb.appendChild(tr);
     });
 
     document.getElementById('btn-exportar').onclick=()=>{
-      const blob=new Blob([csv(d)],{type:'text/csv'});
-      const url=URL.createObjectURL(blob); const a=document.createElement('a');
-      a.href=url; a.download=`TSC_Programming_${d.header?.fecha||'fecha'}.csv`; a.click();
+      const rows=[['Eco','N° de VINS','N° Viaje','Status']];
+      ops.forEach(r=>rows.push([r.eco,r.vins,r.viaje,r.status]));
+      rows.push(['Programming', ops.reduce((a,b)=>a+(b.vins||0),0), ops.length, '']);
+      const csv=rows.map(r=>r.map(x=>`"${String(x??'').replaceAll('"','""')}"`).join(',')).join('\n');
+      const blob=new Blob([csv],{type:'text/csv'}); const url=URL.createObjectURL(blob);
+      const a=document.createElement('a'); a.href=url; a.download=`TSC_Programming_${h.fecha||'fecha'}.csv`; a.click();
       setTimeout(()=>URL.revokeObjectURL(url),4000);
     };
-    document.getElementById('btn-imagen').onclick=()=>{ window.open('operacion.html#autoPNG','_blank'); };
+    document.getElementById('btn-imagen').onclick=()=> window.open('activas.html','_blank');
   })();
 </script>
 </body>
