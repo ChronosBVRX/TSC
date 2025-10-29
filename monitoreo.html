@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Monitoreo</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-950 text-slate-100">
+  <main class="mx-auto flex max-w-5xl flex-col gap-6 px-4 py-6">
+    <header>
+      <h1 class="text-2xl font-semibold">Monitoreo</h1>
+      <p class="text-sm text-slate-400">Visualización de telemetría y status en campo.</p>
+    </header>
+
+    <section class="grid gap-4 md:grid-cols-[2fr_1fr]">
+      <div class="rounded-xl border border-slate-800 bg-slate-900 p-4">
+        <h2 class="text-sm font-semibold">Mapa / Tracking</h2>
+        <div class="mt-2 aspect-video overflow-hidden rounded-lg border border-slate-800 bg-slate-900">
+          <iframe src="about:blank" class="h-full w-full" sandbox="allow-same-origin allow-scripts allow-forms allow-popups"></iframe>
+        </div>
+      </div>
+      <div class="rounded-xl border border-slate-800 bg-slate-900 p-4">
+        <h2 class="text-sm font-semibold">KPIs</h2>
+        <ul class="mt-2 grid grid-cols-2 gap-3 text-sm">
+          <li class="rounded-lg border border-slate-800 bg-slate-900 p-3">
+            <div class="text-slate-400">Activas</div>
+            <div class="text-2xl font-semibold">12</div>
+          </li>
+          <li class="rounded-lg border border-slate-800 bg-slate-900 p-3">
+            <div class="text-slate-400">En ruta</div>
+            <div class="text-2xl font-semibold">9</div>
+          </li>
+          <li class="rounded-lg border border-slate-800 bg-slate-900 p-3">
+            <div class="text-slate-400">Retrasos</div>
+            <div class="text-2xl font-semibold text-amber-300">3</div>
+          </li>
+          <li class="rounded-lg border border-slate-800 bg-slate-900 p-3">
+            <div class="text-slate-400">Alertas</div>
+            <div class="text-2xl font-semibold text-rose-400">1</div>
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="rounded-xl border border-slate-800 bg-slate-900 p-4">
+      <div class="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+        <div>
+          <h2 class="text-lg font-semibold">Eventos recientes</h2>
+          <p class="text-sm text-slate-400">Bitácora en vivo de alertas y movimientos.</p>
+        </div>
+        <button class="rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 text-xs font-semibold text-slate-200 transition hover:border-cyan-400 hover:bg-cyan-400/10">Exportar</button>
+      </div>
+      <div class="mt-4 overflow-x-auto">
+        <table class="min-w-full text-left text-sm">
+          <thead class="text-slate-400">
+            <tr>
+              <th class="px-3 py-2">Hora</th>
+              <th class="px-3 py-2">Unidad</th>
+              <th class="px-3 py-2">Evento</th>
+              <th class="px-3 py-2">Estado</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-800">
+            <tr>
+              <td class="px-3 py-2">08:14</td>
+              <td class="px-3 py-2">014</td>
+              <td class="px-3 py-2">Cruce caseta Tepotzotlán</td>
+              <td class="px-3 py-2 text-emerald-300">OK</td>
+            </tr>
+            <tr>
+              <td class="px-3 py-2">08:37</td>
+              <td class="px-3 py-2">017</td>
+              <td class="px-3 py-2">Variación de velocidad</td>
+              <td class="px-3 py-2 text-amber-300">Revisar</td>
+            </tr>
+            <tr>
+              <td class="px-3 py-2">08:52</td>
+              <td class="px-3 py-2">021</td>
+              <td class="px-3 py-2">Ingreso a punto seguro</td>
+              <td class="px-3 py-2 text-emerald-300">OK</td>
+            </tr>
+            <tr>
+              <td class="px-3 py-2">09:05</td>
+              <td class="px-3 py-2">034</td>
+              <td class="px-3 py-2">Alerta de combustible</td>
+              <td class="px-3 py-2 text-rose-400">Atención</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

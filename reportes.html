@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Reportes</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-950 text-slate-100">
+  <main class="mx-auto flex max-w-5xl flex-col gap-6 px-4 py-6">
+    <header>
+      <h1 class="text-2xl font-semibold">Reportes</h1>
+      <p class="text-sm text-slate-400">Descargas y visualización histórica.</p>
+    </header>
+
+    <section class="rounded-xl border border-slate-800 bg-slate-900 p-4">
+      <div class="flex flex-col gap-3 md:flex-row md:items-end md:justify-between">
+        <div class="grid w-full max-w-xl grid-cols-2 gap-3 text-sm md:max-w-none md:flex-1">
+          <label class="grid gap-1">
+            <span>Fecha inicio</span>
+            <input type="date" class="rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 outline-none transition focus:border-cyan-400 focus:ring focus:ring-cyan-500/20" />
+          </label>
+          <label class="grid gap-1">
+            <span>Fecha fin</span>
+            <input type="date" class="rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 outline-none transition focus:border-cyan-400 focus:ring focus:ring-cyan-500/20" />
+          </label>
+          <label class="grid gap-1 col-span-2">
+            <span>Unidad</span>
+            <input placeholder="Todas" class="rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 outline-none transition focus:border-cyan-400 focus:ring focus:ring-cyan-500/20" />
+          </label>
+        </div>
+        <div class="flex flex-wrap gap-2 text-xs">
+          <button class="rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 font-semibold text-slate-200 transition hover:border-cyan-400 hover:bg-cyan-400/10">Consultar</button>
+          <button class="rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 font-semibold text-slate-200 transition hover:border-cyan-400 hover:bg-cyan-400/10">Exportar CSV</button>
+          <button class="rounded-lg border border-slate-700 bg-slate-800 px-3 py-2 font-semibold text-slate-200 transition hover:border-cyan-400 hover:bg-cyan-400/10">Exportar XLSX</button>
+        </div>
+      </div>
+
+      <div class="mt-4 overflow-x-auto">
+        <table class="min-w-full text-left text-sm">
+          <thead class="text-slate-400">
+            <tr>
+              <th class="px-3 py-2">Fecha</th>
+              <th class="px-3 py-2">Unidad</th>
+              <th class="px-3 py-2">Operador</th>
+              <th class="px-3 py-2">Estatus</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-800">
+            <tr>
+              <td class="px-3 py-2">2025-10-29 07:05</td>
+              <td class="px-3 py-2">001</td>
+              <td class="px-3 py-2">L. Pérez</td>
+              <td class="px-3 py-2">Salida base</td>
+            </tr>
+            <tr>
+              <td class="px-3 py-2">2025-10-29 07:22</td>
+              <td class="px-3 py-2">014</td>
+              <td class="px-3 py-2">J. Gómez</td>
+              <td class="px-3 py-2">Chequeo ruta</td>
+            </tr>
+            <tr>
+              <td class="px-3 py-2">2025-10-29 07:44</td>
+              <td class="px-3 py-2">021</td>
+              <td class="px-3 py-2">A. Ramírez</td>
+              <td class="px-3 py-2">Carga completada</td>
+            </tr>
+            <tr>
+              <td class="px-3 py-2">2025-10-29 08:10</td>
+              <td class="px-3 py-2">034</td>
+              <td class="px-3 py-2">M. Herrera</td>
+              <td class="px-3 py-2">Salida con escolta</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
