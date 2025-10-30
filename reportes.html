@@ -1,94 +1,238 @@
 <!doctype html>
 <html lang="es">
 <head>
-<meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
-<title>Reportes</title>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Reportes consolidados</title>
 <script src="https://cdn.tailwindcss.com"></script>
+<style>
+  :root{ --bg:#05070b; --panel:#0b1220; --edge:#101826; --txt:#c7d2fe; --cyan:#22d3ee; --vio:#8b5cf6; --rose:#fb7185; }
+  body{
+    color:#e5e7eb;
+    background:
+      radial-gradient(1200px 800px at 10% 0%,#0b1220 0%,transparent 60%),
+      radial-gradient(800px 600px at 90% 10%,#0a1630 0%,transparent 55%),
+      linear-gradient(180deg,#05070b 0%,#070b12 60%,#05070b 100%);
+    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
+  }
+  .card{border:1px solid #0f1b2e;background:linear-gradient(180deg,#0b1220 0%, #0a1323 100%),rgba(0,0,0,.4);
+        box-shadow:0 0 0 1px rgba(34,211,238,.15) inset, 0 0 32px rgba(34,211,238,.06); border-radius:16px}
+  .in{border:1px solid #1f2a40;background:#0e1423;border-radius:.75rem;padding:.6rem .8rem;outline:none}
+  .in:focus{box-shadow:0 0 0 2px rgba(34,211,238,.35)}
+  .kpi{border:1px solid #16304a;background:#0e1728;border-radius:14px;padding:12px}
+  .tbl{width:100%;border-collapse:collapse}
+  .tbl th{font-size:.72rem;text-transform:uppercase;letter-spacing:.02em;text-align:left;color:#cbd5e1;border-bottom:1px solid #1c2845;padding:.55rem .7rem}
+  .tbl td{padding:.55rem .7rem;border-bottom:1px solid #16243e;white-space:nowrap}
+  .tbl tr:hover td{background:rgba(34,211,238,.05)}
+  .badge{padding:.15rem .45rem;border:1px solid #184b5a;border-radius:.5rem;background:#0c2330;font-size:.68rem}
+</style>
 </head>
-<body class="bg-slate-950 text-slate-100">
-<main class="max-w-5xl mx-auto p-4 space-y-4">
-  <section class="rounded-2xl border border-slate-800/70 bg-slate-900/60 p-4">
-    <h2 class="text-sm font-semibold mb-2">Resumen del día</h2>
-    <div id="head" class="text-xs text-slate-300"></div>
-    <div class="mt-3 grid grid-cols-3 gap-3 text-center">
-      <div class="rounded-lg border border-slate-800 p-3">
-        <div class="text-[11px] text-slate-400">Viajes</div>
-        <div id="k-viajes" class="text-xl font-bold">0</div>
+<body class="min-h-screen">
+<main class="max-w-7xl mx-auto p-4 space-y-4">
+
+  <!-- Encabezado -->
+  <section class="card p-4">
+    <div class="flex items-center justify-between gap-4">
+      <div class="flex items-center gap-3">
+        <img class="h-12 w-12 rounded-xl ring-1 ring-cyan-400/40 bg-cyan-500/20"
+             src="https://raw.githubusercontent.com/ChronosBVRX/TSC/main/Imagen%20de%20WhatsApp%202025-10-29%20a%20las%2013.29.51_292c634c.jpg" alt="TSC">
+        <div>
+          <div class="text-sm font-semibold">Reporte consolidado del día</div>
+          <div class="text-[12px] text-slate-300">Filtra por fecha para agrupar resultados</div>
+        </div>
       </div>
-      <div class="rounded-lg border border-slate-800 p-3">
-        <div class="text-[11px] text-slate-400">VINS</div>
-        <div id="k-vins" class="text-xl font-bold">0</div>
+      <div class="flex items-center gap-2">
+        <input id="f-fecha" type="date" class="in">
+        <button id="btn-export" class="px-3 py-2 text-xs rounded bg-cyan-600 hover:bg-cyan-500">Exportar CSV consolidado</button>
       </div>
-      <div class="rounded-lg border border-slate-800 p-3">
-        <div class="text-[11px] text-slate-400">Transportista</div>
-        <div id="k-trans" class="text-xl font-bold">-</div>
-      </div>
-    </div>
-    <div class="mt-3 flex gap-2">
-      <a href="operacion.html" target="_blank" class="px-3 py-2 text-xs rounded-lg border border-slate-700">Editar datos</a>
-      <button id="btn-exportar" class="px-3 py-2 text-xs rounded-lg border border-slate-700">Exportar CSV</button>
-      <button id="btn-imagen" class="px-3 py-2 text-xs rounded-lg bg-emerald-600 hover:bg-emerald-500 font-semibold">Generar PNG (abre Activas)</button>
     </div>
   </section>
 
-  <section class="rounded-2xl border border-slate-800/70 bg-slate-900/60 p-4">
-    <h3 class="text-sm font-semibold mb-2">Detalle</h3>
-    <div class="overflow-x-auto">
-      <table class="min-w-full text-sm">
+  <!-- KPIs -->
+  <section class="grid md:grid-cols-4 gap-3">
+    <div class="kpi">
+      <div class="text-[12px] text-slate-400">Madrinas · VINS</div>
+      <div id="kpi-m-vins" class="text-2xl font-semibold">0</div>
+    </div>
+    <div class="kpi">
+      <div class="text-[12px] text-slate-400">Madrinas · Viajes</div>
+      <div id="kpi-m-viajes" class="text-2xl font-semibold">0</div>
+    </div>
+    <div class="kpi">
+      <div class="text-[12px] text-slate-400">Nacionales · Unidades</div>
+      <div id="kpi-n-count" class="text-2xl font-semibold">0</div>
+    </div>
+    <div class="kpi">
+      <div class="text-[12px] text-slate-400">Contenedores · Registros</div>
+      <div id="kpi-c-count" class="text-2xl font-semibold">0</div>
+    </div>
+  </section>
+
+  <!-- Sección Madrinas -->
+  <section class="card p-4 space-y-2">
+    <div class="flex items-center justify-between">
+      <h3 class="font-semibold">Madrinas</h3>
+      <div id="hdr-m" class="text-[12px] text-slate-300"></div>
+    </div>
+    <div class="overflow-auto">
+      <table class="tbl">
         <thead>
-          <tr class="bg-slate-800 text-slate-300">
-            <th class="px-3 py-2 text-left">Eco</th>
-            <th class="px-3 py-2">VINS</th>
-            <th class="px-3 py-2">Viaje</th>
-            <th class="px-3 py-2 text-left">Status</th>
+          <tr>
+            <th>Eco</th><th>VINS</th><th>N° Viaje</th><th>Status</th><th>Creado</th>
           </tr>
         </thead>
-        <tbody id="tb"></tbody>
+        <tbody id="tb-m"></tbody>
       </table>
     </div>
   </section>
+
+  <!-- Sección Nacionales -->
+  <section class="card p-4 space-y-2">
+    <div class="flex items-center justify-between">
+      <h3 class="font-semibold">Nacionales</h3>
+      <div id="hdr-n" class="text-[12px] text-slate-300"></div>
+    </div>
+    <div class="overflow-auto">
+      <table class="tbl">
+        <thead>
+          <tr>
+            <th>Económico</th><th>Placa</th><th>Operador</th><th>Asignación</th><th>N° Viaje</th><th>Dealer</th><th>Origen</th><th>Destino</th><th>Ubicación</th><th>Status</th><th>Inicio</th><th>Llegada</th><th>Creado</th>
+          </tr>
+        </thead>
+        <tbody id="tb-n"></tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- Sección Contenedores -->
+  <section class="card p-4 space-y-2">
+    <div class="flex items-center justify-between">
+      <h3 class="font-semibold">Contenedores</h3>
+      <div id="hdr-c" class="text-[12px] text-slate-300"></div>
+    </div>
+    <div class="overflow-auto">
+      <table class="tbl">
+        <thead>
+          <tr>
+            <th>Transporte</th><th>Operador</th><th>Teléfono</th><th>Económico</th><th>Placa</th><th>No. Contenedor</th><th>Terminal</th><th>Status</th><th>Creado</th>
+          </tr>
+        </thead>
+        <tbody id="tb-c"></tbody>
+      </table>
+    </div>
+  </section>
+
 </main>
 
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script>
-  const SUPABASE_URL = "https://xugajqlyvojqeciawpzj.supabase.co";
-  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh1Z2FqcWx5dm9qcWVjaWF3cHpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE3NjM4MzksImV4cCI6MjA3NzMzOTgzOX0.tt2_6zqf9R0cGO6Fenx_FJO6sAg6jM_CYY1Peuq6Qyo";
-  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const sb = supabase.createClient(
+  "https://xugajqlyvojqeciawpzj.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh1Z2FqcWx5dm9qcWVjaWF3cHpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE3NjM4MzksImV4cCI6MjA3NzMzOTgzOX0.tt2_6zqf9R0cGO6Fenx_FJO6sAg6jM_CYY1Peuq6Qyo"
+);
+const $=s=>document.querySelector(s);
 
-  async function loadHeader(){ const {data}=await sb.from('header').select('*').eq('id','dia').maybeSingle(); return data||{}; }
-  async function loadOps(){ const {data}=await sb.from('ops_active').select('*').order('created_at',{ascending:true}); return data||[]; }
+let rowsM=[], rowsN=[], rowsC=[];
 
-  (async function init(){
-    const h=await loadHeader(); const ops=await loadOps();
-    document.getElementById('head').textContent=`Cliente: ${h.cliente||'-'} · Buque: ${h.buque||'-'} · Fecha: ${h.fecha||'-'} · Transportista: ${h.transportista||'-'}`;
-    document.getElementById('k-viajes').textContent=ops.length;
-    document.getElementById('k-vins').textContent=ops.reduce((a,b)=>a+(b.vins||0),0);
-    document.getElementById('k-trans').textContent=h.transportista||'-';
+(async()=>{
+  // Fecha por defecto: la de header_madrinas si existe; si no, hoy
+  const {data:hd}=await sb.from('header_madrinas').select('*').eq('id','dia').maybeSingle();
+  $('#f-fecha').value = hd?.fecha || new Date().toISOString().slice(0,10);
 
-    const tb=document.getElementById('tb'); tb.innerHTML='';
-    ops.forEach(r=>{
-      const tr=document.createElement('tr'); tr.className='border-b border-slate-800';
-      tr.innerHTML=`<td class="px-3 py-2">${r.eco}</td>
-      <td class="px-3 py-2 text-center">${r.vins??''}</td>
-      <td class="px-3 py-2 text-center">${r.viaje}</td>
-      <td class="px-3 py-2">${r.status}</td>`;
-      tb.appendChild(tr);
-    });
+  $('#f-fecha').addEventListener('change', loadAll);
+  document.getElementById('btn-export').addEventListener('click', exportCSV);
 
-    document.getElementById('btn-exportar').onclick=()=>{
-      const rows=[
-        ['LOGO_IZQUIERDO','TSC'], ['LOGO_DERECHO', h.transportista || ''],
-        [], ['Eco','N° de VINS','N° Viaje','Status']
-      ];
-      ops.forEach(r=>rows.push([r.eco,r.vins,r.viaje,r.status]));
-      rows.push(['Programming', ops.reduce((a,b)=>a+(b.vins||0),0), ops.length, '']);
-      const csv=rows.map(r=>r.map(x=>`"${String(x??'').replaceAll('"','""')}"`).join(',')).join('\n');
-      const blob=new Blob([csv],{type:'text/csv'}); const url=URL.createObjectURL(blob);
-      const a=document.createElement('a'); a.href=url; a.download=`TSC_Programming_${h.fecha||'fecha'}.csv`; a.click();
-      setTimeout(()=>URL.revokeObjectURL(url),4000);
-    };
-    document.getElementById('btn-imagen').onclick=()=> window.open('activas.html','_blank');
-  })();
+  await loadAll();
+})();
+
+async function loadAll(){
+  const d = $('#f-fecha').value;
+
+  // Headers por tipo para leyenda
+  const [hm, hn, hc] = await Promise.all([
+    sb.from('header_madrinas').select('*').eq('id','dia').maybeSingle(),
+    sb.from('header_nacionales').select('*').eq('id','dia').maybeSingle(),
+    sb.from('header_contenedores').select('*').eq('id','dia').maybeSingle()
+  ]);
+
+  $('#hdr-m').innerHTML = `Cliente: <b>${hm.data?.cliente||'—'}</b> · Buque: <b>${hm.data?.buque||'—'}</b> · Fecha: <b>${hm.data?.fecha||'—'}</b>`;
+  $('#hdr-n').innerHTML = `Fecha: <b>${hn.data?.fecha||'—'}</b> · Zona/Ruta: <b>${hn.data?.zona||'—'}</b>`;
+  $('#hdr-c').innerHTML = `Fecha: <b>${hc.data?.fecha||'—'}</b> · Terminal: <b>${hc.data?.terminal||'—'}</b>`;
+
+  // Datos por fecha
+  const [m, n, c] = await Promise.all([
+    sb.from('ops_active').select('*').eq('tipo','MADRINAS').order('created_at',{ascending:false}),
+    sb.from('ops_nacionales').select('*').order('created_at',{ascending:false}),
+    sb.from('ops_contenedores').select('*').order('created_at',{ascending:false})
+  ]);
+
+  rowsM = (m.data||[]).filter(r=>!d || (r.fecha ? String(r.fecha)===d : true));
+  rowsN = (n.data||[]).filter(r=>!d || (r.fecha ? String(r.fecha)===d : true));
+  rowsC = (c.data||[]).filter(r=>!d || (r.fecha ? String(r.fecha)===d : true));
+
+  renderTables();
+  renderKPIs();
+}
+
+function renderTables(){
+  // Madrinas
+  const tbm=$('#tb-m'); tbm.innerHTML='';
+  rowsM.forEach(r=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${r.eco||''}</td><td>${r.vins||0}</td><td>${r.viaje||''}</td><td><span class="badge">${r.status||''}</span></td><td>${fmtDate(r.created_at)}</td>`;
+    tbm.appendChild(tr);
+  });
+
+  // Nacionales
+  const tbn=$('#tb-n'); tbn.innerHTML='';
+  rowsN.forEach(r=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${r.economico||''}</td><td>${r.placa||''}</td><td>${r.operador||''}</td><td>${r.asignacion||''}</td>
+      <td>${r.no_viaje||''}</td><td>${r.dealer||''}</td><td>${r.origen||''}</td><td>${r.destino||''}</td><td>${r.ubicacion||''}</td>
+      <td><span class="badge">${r.status||''}</span></td><td>${fmtDate(r.inicio_ruta)}</td><td>${fmtDate(r.llegada_destino)}</td><td>${fmtDate(r.created_at)}</td>`;
+    tbn.appendChild(tr);
+  });
+
+  // Contenedores
+  const tbc=$('#tb-c'); tbc.innerHTML='';
+  rowsC.forEach(r=>{
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${r.transporte||''}</td><td>${r.operador||''}</td><td>${r.telefono||''}</td><td>${r.economico||''}</td>
+      <td>${r.placa||''}</td><td>${r.contenedor||''}</td><td>${r.terminal||''}</td><td><span class="badge">${r.status||''}</span></td><td>${fmtDate(r.created_at)}</td>`;
+    tbc.appendChild(tr);
+  });
+}
+
+function renderKPIs(){
+  const vins = rowsM.reduce((a,b)=>a + (parseInt(b.vins||0,10)||0), 0);
+  const viajes = new Set(rowsM.map(r=>String(r.viaje||'').trim()).filter(Boolean)).size;
+  $('#kpi-m-vins').textContent = vins;
+  $('#kpi-m-viajes').textContent = viajes;
+  $('#kpi-n-count').textContent = rowsN.length;
+  $('#kpi-c-count').textContent = rowsC.length;
+}
+
+function fmtDate(v){ return v ? new Date(v).toLocaleString() : ''; }
+
+// Export consolidado
+function exportCSV(){
+  // Construir matriz consolidada con columna 'tipo'
+  const all = [
+    ...rowsM.map(r=>({tipo:'MADRINAS', eco:r.eco, vins:r.vins, viaje:r.viaje, status:r.status, fecha:r.fecha||'', created_at:r.created_at||''})),
+    ...rowsN.map(r=>({tipo:'NACIONALES', economico:r.economico, placa:r.placa, operador:r.operador, no_viaje:r.no_viaje, dealer:r.dealer, origen:r.origen, destino:r.destino, status:r.status, fecha:r.fecha||'', created_at:r.created_at||''})),
+    ...rowsC.map(r=>({tipo:'CONTENEDORES', transporte:r.transporte, operador:r.operador, telefono:r.telefono, economico:r.economico, placa:r.placa, contenedor:r.contenedor, terminal:r.terminal, status:r.status, fecha:r.fecha||'', created_at:r.created_at||''}))
+  ];
+
+  if(all.length===0){ alert('No hay datos para exportar con la fecha seleccionada.'); return; }
+
+  const cols = Array.from(all.reduce((set,row)=>{Object.keys(row).forEach(k=>set.add(k)); return set;}, new Set()));
+  const header = cols.map(c=>`"${c.replace(/"/g,'""')}"`).join(',');
+  const body = all.map(r=>cols.map(c=>`"${String(r[c]??'').replace(/"/g,'""')}"`).join(',')).join('\n');
+  const csv = header+'\n'+body;
+
+  const blob=new Blob([csv],{type:'text/csv;charset=utf-8;'});
+  const fn=`Reporte_${$('#f-fecha').value||new Date().toISOString().slice(0,10)}.csv`;
+  const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=fn; document.body.appendChild(a); a.click(); a.remove();
+}
 </script>
 </body>
 </html>
