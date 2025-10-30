@@ -2,352 +2,168 @@
 <html lang="es">
 <head>
 <meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
-<title>Operación del día · Altas</title>
+<title>Operación del día</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <style>
-  :root{ --bg:#05070b; --panel:#0b1220; --edge:#101826; --txt:#c7d2fe; --cyan:#22d3ee; --vio:#8b5cf6; --rose:#fb7185; }
-  body{
-    color:#e5e7eb;
-    background:
-      radial-gradient(1200px 800px at 10% 0%,#0b1220 0%,transparent 60%),
-      radial-gradient(800px 600px at 90% 10%,#0a1630 0%,transparent 55%),
-      linear-gradient(180deg,#05070b 0%,#070b12 60%,#05070b 100%);
-    font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial;
-  }
-  .neon{border:1px solid #0f1b2e;background:linear-gradient(180deg,#0b1220 0%, #0a1323 100%),rgba(0,0,0,.4);
-        box-shadow:0 0 0 1px rgba(34,211,238,.15) inset, 0 0 32px rgba(34,211,238,.06);}
-  .glow{box-shadow:0 0 0 1px rgba(34,211,238,.18) inset, 0 0 24px rgba(139,92,246,.12)}
-  .tab-btn[aria-selected="true"]{background:#0f172a;border-color:#22d3ee;color:#e6faff}
+  :root{--bg:#05070b;--panel:#0b1220;--edge:#101826;--txt:#c7d2fe;--cyan:#22d3ee;--vio:#8b5cf6;--rose:#fb7185;}
+  body{color:#e5e7eb;background:radial-gradient(1200px 800px at 10% 0%,#0b1220 0%,transparent 60%),radial-gradient(800px 600px at 90% 10%,#0a1630 0%,transparent 55%),linear-gradient(180deg,#05070b 0%,#070b12 60%,#05070b 100%);font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;}
+  .neon{border:1px solid #0f1b2e;background:linear-gradient(180deg,#0b1220 0%,#0a1323 100%),rgba(0,0,0,.4);box-shadow:0 0 0 1px rgba(34,211,238,.15) inset,0 0 32px rgba(34,211,238,.06);}
+  .glow{box-shadow:0 0 0 1px rgba(34,211,238,.18) inset,0 0 24px rgba(139,92,246,.12)}
   .in{border:1px solid #1f2a40;background:#0e1423;border-radius:.75rem;padding:.6rem .8rem;outline:none}
   .in:focus{box-shadow:0 0 0 2px rgba(34,211,238,.35)}
   label>span{font-size:.72rem;color:#cbd5e1}
   .grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.75rem}
   .grid-4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.75rem}
   .grid-5{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:.75rem}
-  @media (max-width:1024px){.grid-3,.grid-4,.grid-5{grid-template-columns:1fr}}
+  @media(max-width:1024px){.grid-3,.grid-4,.grid-5{grid-template-columns:1fr}}
 </style>
 </head>
 <body class="min-h-screen">
 <main class="max-w-6xl mx-auto p-4 space-y-4">
 
-  <!-- Encabezado del día -->
-  <section class="neon glow rounded-2xl p-4">
-    <div class="flex items-center justify-between mb-3">
-      <div class="flex items-center gap-3">
-        <!-- Logo TSC fijo izquierda -->
-        <img id="logo-left" class="h-10 w-10 rounded-xl object-cover ring-1 ring-cyan-400/40 bg-cyan-500/20"
-             src="https://raw.githubusercontent.com/ChronosBVRX/TSC/main/Imagen%20de%20WhatsApp%202025-10-29%20a%20las%2013.29.51_292c634c.jpg" alt="TSC">
-        <div>
-          <h2 class="text-sm font-semibold leading-tight">Operación del día</h2>
-          <p class="text-[11px] text-slate-400">Completa los datos y agrega las operaciones por tipo</p>
-        </div>
-      </div>
-      <!-- Logo derecho (transportista) -->
-      <img id="logo-right" class="h-10 rounded border border-slate-700" alt="Transportista" style="display:none">
-    </div>
-
-    <div class="grid-3">
-      <label class="grid gap-1"><span>Cliente</span>
-        <input id="h-cliente" class="in" value="FORD"/>
-      </label>
-      <label class="grid gap-1"><span>Buque</span>
-        <input id="h-buque" class="in" placeholder="LAPIS ARROW"/>
-      </label>
-      <label class="grid gap-1"><span>Fecha</span>
-        <input id="h-fecha" type="date" class="in"/>
-      </label>
-    </div>
-
-    <div class="mt-3 grid-3 items-end">
-      <div class="text-xs">
-        <div class="mb-1">Logo izquierdo</div>
-        <div class="text-[11px] text-slate-400">TSC siempre a la izquierda</div>
-      </div>
-      <label class="grid gap-1 text-xs">
-        <span>Logo derecho (transportista)</span>
-        <select id="h-transportista" class="in">
-          <option value="">— Ninguno —</option>
-          <option value="HADRON">HADRON</option>
-          <option value="RAPIDOS">RÁPIDOS</option>
-        </select>
-      </label>
-      <div class="text-xs">
-        <div class="mb-1">Vista previa (derecha)</div>
-        <div class="text-[11px] text-slate-400">Solo aparece si eliges transportista</div>
+<!-- 🔹 Encabezado -->
+<section class="neon glow rounded-2xl p-4">
+  <div class="flex items-center justify-between mb-3">
+    <div class="flex items-center gap-3">
+      <img class="h-10 w-10 rounded-xl ring-1 ring-cyan-400/40 bg-cyan-500/20"
+        src="https://raw.githubusercontent.com/ChronosBVRX/TSC/main/Imagen%20de%20WhatsApp%202025-10-29%20a%20las%2013.29.51_292c634c.jpg" alt="TSC">
+      <div>
+        <h2 class="text-sm font-semibold leading-tight">Programación del día</h2>
+        <p class="text-[11px] text-slate-400">Captura las operaciones por tipo</p>
       </div>
     </div>
-  </section>
+    <img id="logo-right" class="h-10 rounded border border-slate-700" style="display:none">
+  </div>
 
-  <!-- Tabs -->
-  <section class="neon glow rounded-2xl p-2">
-    <div class="flex gap-2 p-2">
-      <button class="px-3 py-2 text-xs rounded border border-slate-700" data-tab="madrinas" aria-selected="true">Madrinas</button>
-      <button class="px-3 py-2 text-xs rounded border border-slate-700" data-tab="nacionales">Nacionales</button>
-      <button class="px-3 py-2 text-xs rounded border border-slate-700" data-tab="contenedores">Contenedores</button>
-      <div class="ml-auto">
-        <a href="activas.html" class="px-3 py-2 text-xs rounded border border-slate-700">Ir a Activas</a>
-      </div>
+  <div class="grid-3">
+    <label class="grid gap-1"><span>Cliente</span><input id="h-cliente" class="in" value="FORD"></label>
+    <label class="grid gap-1"><span>Buque</span><input id="h-buque" class="in" placeholder="LAPIS ARROW"></label>
+    <label class="grid gap-1"><span>Fecha</span><input id="h-fecha" type="date" class="in"></label>
+  </div>
+
+  <div class="mt-3 grid-3 items-end">
+    <div class="text-xs text-slate-400">TSC siempre va a la izquierda</div>
+    <label class="grid gap-1 text-xs"><span>Transportista</span>
+      <select id="h-transportista" class="in">
+        <option value="">— Ninguno —</option>
+        <option value="HADRON">HADRON</option>
+        <option value="RAPIDOS">RÁPIDOS</option>
+      </select>
+    </label>
+    <div class="text-xs text-slate-400">Logo derecho solo si eliges transportista</div>
+  </div>
+</section>
+
+<!-- 🔹 Tabs -->
+<section class="neon glow rounded-2xl p-2">
+  <div class="flex gap-2 p-2">
+    <button class="px-3 py-2 text-xs rounded border border-slate-700" data-tab="madrinas" aria-selected="true">Madrinas</button>
+    <button class="px-3 py-2 text-xs rounded border border-slate-700" data-tab="nacionales">Nacionales</button>
+    <button class="px-3 py-2 text-xs rounded border border-slate-700" data-tab="contenedores">Contenedores</button>
+    <div class="ml-auto">
+      <a href="activas.html" class="px-3 py-2 text-xs rounded border border-slate-700">Ir a Activas</a>
     </div>
+  </div>
 
-    <!-- MADRINAS -->
-    <div id="tab-madrinas" class="p-4 space-y-3">
-      <h3 class="text-sm font-semibold">Agregar operación – Madrinas</h3>
-      <div class="grid-5">
-        <label class="grid gap-1"><span>Eco</span>
-          <input id="m-eco" class="in" placeholder="17017 / M1"/>
-        </label>
-        <label class="grid gap-1"><span>N° de VINS</span>
-          <input id="m-vins" type="number" value="9" min="0" class="in"/>
-        </label>
-        <label class="grid gap-1"><span>N° de Viaje</span>
-          <input id="m-viaje" class="in" placeholder="MED-01"/>
-        </label>
-        <label class="grid gap-1"><span>Status</span>
-          <select id="m-status" class="in">
-            <option>TRAYECTO A ASLA</option>
-            <option>EN TERMINAL PROCESO DE CARGA</option>
-            <option>SALIENDO DE TERMINAL CARGADO</option>
-            <option>CARGADO EN RUTA FISCAL</option>
-            <option>POR MODULAR</option>
-            <option>TRAYECTO A PATIO DE DESCARGA</option>
-            <option>DESCARGADO 100%</option>
-            <option>1ER VUELTA</option>
-            <option>2DA VUELTA</option>
-            <option>3ER VUELTA</option>
-            <option>4TA VUELTA</option>
-            <option>5TA VUELTA</option>
-            <option>EN PATIO EN PROCESO DE DESCARGA</option>
-            <option>EN TRAYECTO A PATIO DE RESGUARDO</option>
-            <option>CARGADO EN PATIO DE RESGUARDO</option>
-            <option>TRAYECTO A TERMINAL</option>
-            <option>REGISTRADO EN ESPERA DE LLAMADO</option>
-            <option>EN TERMINAL EN ESPERA DE CARGA EN ASLA</option>
-          </select>
-        </label>
-        <div class="flex items-end">
-          <button class="w-full rounded-lg bg-cyan-600 hover:bg-cyan-500 px-3 py-2 text-xs font-semibold" id="btn-m">Agregar</button>
-        </div>
-      </div>
-      <p id="msg-m" class="text-xs text-emerald-300 hidden">Operación agregada a <b>Madrinas</b>.</p>
+  <!-- 🔸 Madrinas -->
+  <div id="tab-madrinas" class="p-4 space-y-3">
+    <h3 class="text-sm font-semibold">Agregar operación – Madrinas</h3>
+    <div class="grid-5">
+      <label class="grid gap-1"><span>Eco</span><input id="m-eco" class="in" placeholder="17017"></label>
+      <label class="grid gap-1"><span>N° de VINS</span><input id="m-vins" type="number" value="9" min="0" class="in"></label>
+      <label class="grid gap-1"><span>N° de Viaje</span><input id="m-viaje" class="in" placeholder="MED-01"></label>
+      <label class="grid gap-1"><span>Status</span>
+        <select id="m-status" class="in">
+          <option>TRAYECTO A ASLA</option><option>EN TERMINAL PROCESO DE CARGA</option><option>SALIENDO DE TERMINAL CARGADO</option><option>CARGADO EN RUTA FISCAL</option><option>POR MODULAR</option><option>TRAYECTO A PATIO DE DESCARGA</option><option>DESCARGADO 100%</option><option>EN TRAYECTO A TERMINAL</option><option>REGISTRADO EN ESPERA DE LLAMADO</option>
+        </select></label>
+      <div class="flex items-end"><button id="btn-m" class="w-full bg-cyan-600 hover:bg-cyan-500 px-3 py-2 text-xs rounded-lg">Agregar</button></div>
     </div>
+    <p id="msg-m" class="text-xs text-emerald-300 hidden">Operación agregada a Madrinas.</p>
+  </div>
 
-    <!-- NACIONALES -->
-    <div id="tab-nacionales" class="p-4 space-y-3 hidden">
-      <h3 class="text-sm font-semibold">Agregar operación – Nacionales</h3>
-      <div class="grid-4">
-        <label class="grid gap-1"><span>Eco</span>
-          <input id="n-eco" class="in" placeholder="Económico"/>
-        </label>
-        <label class="grid gap-1"><span>Operador</span>
-          <input id="n-operador" class="in" placeholder="Nombre del operador"/>
-        </label>
-        <label class="grid gap-1"><span>Teléfono</span>
-          <input id="n-telefono" class="in" placeholder="753 000 0000"/>
-        </label>
-        <label class="grid gap-1"><span>Status</span>
-          <select id="n-status" class="in">
-            <option>EN ORIGEN</option>
-            <option>CARGANDO</option>
-            <option>EN TRÁNSITO</option>
-            <option>DESCARGANDO</option>
-            <option>ENTREGADO</option>
-            <option>INCIDENCIA</option>
-          </select>
-        </label>
-      </div>
-      <div class="flex justify-end">
-        <button class="rounded-lg bg-cyan-600 hover:bg-cyan-500 px-3 py-2 text-xs font-semibold" id="btn-n">Agregar</button>
-      </div>
-      <p id="msg-n" class="text-xs text-emerald-300 hidden">Operación agregada a <b>Nacionales</b>.</p>
+  <!-- 🔸 Nacionales -->
+  <div id="tab-nacionales" class="p-4 space-y-3 hidden">
+    <h3 class="text-sm font-semibold">Agregar operación – Nacionales</h3>
+    <div class="grid-4">
+      <label class="grid gap-1"><span>Económico</span><input id="n-economico" class="in" placeholder="ECO2511"></label>
+      <label class="grid gap-1"><span>Placa</span><input id="n-placa" class="in" placeholder="59BE4S"></label>
+      <label class="grid gap-1"><span>Operador</span><input id="n-operador" class="in" placeholder="LUIS RAYMUNDO"></label>
+      <label class="grid gap-1"><span>Asignación</span><input id="n-asignacion" type="date" class="in"></label>
     </div>
-
-    <!-- CONTENEDORES -->
-    <div id="tab-contenedores" class="p-4 space-y-3 hidden">
-      <h3 class="text-sm font-semibold">Agregar operación – Contenedores</h3>
-      <div class="grid-4">
-        <label class="grid gap-1"><span>Transporte</span>
-          <input id="c-transporte" class="in" placeholder="TSC / Proveedor"/>
-        </label>
-        <label class="grid gap-1"><span>Operador</span>
-          <input id="c-operador" class="in" placeholder="OSVALDO LEAL"/>
-        </label>
-        <label class="grid gap-1"><span>Teléfono</span>
-          <input id="c-telefono" class="in" placeholder="753 157 8649"/>
-        </label>
-        <label class="grid gap-1"><span>Económico</span>
-          <input id="c-economico" class="in" placeholder="17019"/>
-        </label>
-      </div>
-
-      <div class="grid-4">
-        <label class="grid gap-1"><span>Placa</span>
-          <input id="c-placa" class="in" placeholder="NS7248C"/>
-        </label>
-        <label class="grid gap-1"><span>No. Contenedor</span>
-          <input id="c-contenedor" class="in" placeholder="BMOU5567200 / ILLU4519583"/>
-        </label>
-        <label class="grid gap-1"><span>Terminal</span>
-          <input id="c-terminal" class="in" placeholder="LCTPC / SSA / APM"/>
-        </label>
-        <label class="grid gap-1"><span>Status</span>
-          <select id="c-status" class="in">
-            <option>REGISTRADO EN ESPERA DE LLAMADO</option>
-            <option>ASIGNADO PARA ENTRADA</option>
-            <option>EN FILA DE ACCESO</option>
-            <option>DENTRO DE TERMINAL</option>
-            <option>SALIENDO DE TERMINAL</option>
-            <option>EN TRÁNSITO</option>
-            <option>ENTREGADO</option>
-            <option>INCIDENCIA</option>
-          </select>
-        </label>
-      </div>
-
-      <div class="flex justify-end">
-        <button class="rounded-lg bg-cyan-600 hover:bg-cyan-500 px-3 py-2 text-xs font-semibold" id="btn-c">Agregar</button>
-      </div>
-      <p id="msg-c" class="text-xs text-emerald-300 hidden">Operación agregada a <b>Contenedores</b>.</p>
+    <div class="grid-4">
+      <label class="grid gap-1"><span>N° Viaje</span><input id="n-no_viaje" class="in" placeholder="38"></label>
+      <label class="grid gap-1"><span>Dealer</span><input id="n-dealer" class="in" placeholder="MITSUBISHI"></label>
+      <label class="grid gap-1"><span>Origen</span><input id="n-origen" class="in" placeholder="LZC"></label>
+      <label class="grid gap-1"><span>Destino</span><input id="n-destino" class="in" placeholder="CELAYA"></label>
     </div>
-  </section>
+    <div class="grid-4">
+      <label class="grid gap-1"><span>Ubicación</span><input id="n-ubicacion" class="in" placeholder="Lázaro Cárdenas, Michoacán"></label>
+      <label class="grid gap-1"><span>Status</span>
+        <select id="n-status" class="in">
+          <option>DETENIDO POR CARGA DE DISEL Y CONSUMO DE ALIMENTOS</option><option>EN ORIGEN</option><option>CARGANDO</option><option>EN TRÁNSITO</option><option>DESCARGANDO</option><option>ENTREGADO</option><option>INCIDENCIA</option>
+        </select></label>
+      <label class="grid gap-1"><span>Inicio Ruta</span><input id="n-inicio_ruta" type="datetime-local" class="in"></label>
+      <label class="grid gap-1"><span>Llegada Destino</span><input id="n-llegada_destino" type="datetime-local" class="in"></label>
+    </div>
+    <div class="flex justify-end"><button id="btn-n" class="bg-cyan-600 hover:bg-cyan-500 px-3 py-2 text-xs rounded-lg">Agregar</button></div>
+    <p id="msg-n" class="text-xs text-emerald-300 hidden">Operación agregada a Nacionales.</p>
+  </div>
+
+  <!-- 🔸 Contenedores -->
+  <div id="tab-contenedores" class="p-4 space-y-3 hidden">
+    <h3 class="text-sm font-semibold">Agregar operación – Contenedores</h3>
+    <div class="grid-4">
+      <label class="grid gap-1"><span>Transporte</span><input id="c-transporte" class="in" placeholder="TSC"></label>
+      <label class="grid gap-1"><span>Operador</span><input id="c-operador" class="in" placeholder="OSVALDO LEAL"></label>
+      <label class="grid gap-1"><span>Teléfono</span><input id="c-telefono" class="in" placeholder="753 157 8649"></label>
+      <label class="grid gap-1"><span>Económico</span><input id="c-economico" class="in" placeholder="17019"></label>
+    </div>
+    <div class="grid-4">
+      <label class="grid gap-1"><span>Placa</span><input id="c-placa" class="in" placeholder="NS7248C"></label>
+      <label class="grid gap-1"><span>No. Contenedor</span><input id="c-contenedor" class="in" placeholder="BMOU5567200//TLLU4519583"></label>
+      <label class="grid gap-1"><span>Terminal</span><input id="c-terminal" class="in" placeholder="LCTPC"></label>
+      <label class="grid gap-1"><span>Status</span>
+        <select id="c-status" class="in">
+          <option>REGISTRADO EN ESPERA DE LLAMADO</option><option>ASIGNADO PARA ENTRADA</option><option>EN FILA DE ACCESO</option><option>DENTRO DE TERMINAL</option><option>SALIENDO DE TERMINAL</option><option>EN TRÁNSITO</option><option>ENTREGADO</option><option>INCIDENCIA</option>
+        </select></label>
+    </div>
+    <div class="flex justify-end"><button id="btn-c" class="bg-cyan-600 hover:bg-cyan-500 px-3 py-2 text-xs rounded-lg">Agregar</button></div>
+    <p id="msg-c" class="text-xs text-emerald-300 hidden">Operación agregada a Contenedores.</p>
+  </div>
+</section>
 </main>
 
-<!-- Supabase -->
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <script>
-  // ===== SUPABASE (mismos datos de tu proyecto)
-  const SUPABASE_URL = "https://xugajqlyvojqeciawpzj.supabase.co";
-  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh1Z2FqcWx5dm9qcWVjaWF3cHpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE3NjM4MzksImV4cCI6MjA3NzMzOTgzOX0.tt2_6zqf9R0cGO6Fenx_FJO6sAg6jM_CYY1Peuq6Qyo";
-  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const sb = supabase.createClient(
+  "https://xugajqlyvojqeciawpzj.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh1Z2FqcWx5dm9qcWVjaWF3cHpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE3NjM4MzksImV4cCI6MjA3NzMzOTgzOX0.tt2_6zqf9R0cGO6Fenx_FJO6sAg6jM_CYY1Peuq6Qyo"
+);
+const LOGO_RIGHT={
+ "": "",
+ HADRON:"https://raw.githubusercontent.com/ChronosBVRX/TSC/main/hadron.jpg",
+ RAPIDOS:"https://raw.githubusercontent.com/ChronosBVRX/TSC/main/RAPIDOS-DE-MICHOACAN-1.jpg"
+};
 
-  // ===== LOGOS
-  const LOGO_RIGHT = {
-    "": "",
-    "HADRON": "https://raw.githubusercontent.com/ChronosBVRX/TSC/main/hadron.jpg",
-    "RAPIDOS": "https://raw.githubusercontent.com/ChronosBVRX/TSC/main/RAPIDOS-DE-MICHOACAN-1.jpg"
-  };
+const $=s=>document.querySelector(s);
+const saveHeader=async()=>{
+ const t=$('#h-transportista').value||'';const logo=LOGO_RIGHT[t]||'';
+ const payload={id:'dia',cliente:$('#h-cliente').value,buque:$('#h-buque').value,fecha:$('#h-fecha').value,transportista:t,logo_right_url:logo};
+ await sb.from('header').upsert(payload);
+};
 
-  const $ = s => document.querySelector(s);
-
-  // ===== INIT
-  (async ()=>{
-    // Fecha por defecto
-    $('#h-fecha').value = new Date().toISOString().slice(0,10);
-
-    // Cargar header guardado
-    const h = await dbLoadHeader();
-    if(h){
-      $('#h-cliente').value = h.cliente || '';
-      $('#h-buque').value   = h.buque   || '';
-      $('#h-fecha').value   = h.fecha   || $('#h-fecha').value;
-      $('#h-transportista').value = h.transportista || '';
-    }
-    updateRightLogo();
-
-    // eventos
-    $('#h-transportista').addEventListener('change', updateRightLogo);
-    document.querySelectorAll('[data-tab]').forEach(b=>{
-      b.addEventListener('click',()=>switchTab(b.dataset.tab));
-    });
-
-    // botones alta
-    $('#btn-m').addEventListener('click', addMadrina);
-    $('#btn-n').addEventListener('click', addNacional);
-    $('#btn-c').addEventListener('click', addContenedor);
-  })();
-
-  function switchTab(tab){
-    document.querySelectorAll('[data-tab]').forEach(b=>{
-      b.setAttribute('aria-selected', String(b.dataset.tab===tab));
-    });
-    ['madrinas','nacionales','contenedores'].forEach(t=>{
-      document.getElementById('tab-'+t).classList.toggle('hidden', t!==tab);
-    });
-  }
-
-  function updateRightLogo(){
-    const sel = $('#h-transportista').value || '';
-    const url = LOGO_RIGHT[sel] || '';
-    const img = $('#logo-right');
-    if(url){ img.src = url; img.style.display='block'; }
-    else   { img.src = '';  img.style.display='none'; }
-  }
-
-  // ====== DB helpers
-  async function dbLoadHeader(){
-    const { data, error } = await sb.from('header').select('*').eq('id','dia').maybeSingle();
-    if(error && error.code!=='PGRST116') console.error(error);
-    return data || null;
-  }
-  async function dbSaveHeader(){
-    const transportista = $('#h-transportista').value || '';
-    const logo_right_url = LOGO_RIGHT[transportista] || '';
-    const payload = {
-      id:'dia',
-      cliente: $('#h-cliente').value,
-      buque:   $('#h-buque').value,
-      fecha:   $('#h-fecha').value,
-      transportista,
-      logo_right_url
-    };
-    const { error } = await sb.from('header').upsert(payload);
-    if(error) console.error(error);
-  }
-
-  // ====== ALTAS
-  async function addMadrina(){
-    const eco=$('#m-eco').value.trim();
-    const vins=parseInt($('#m-vins').value||'0',10);
-    const viaje=$('#m-viaje').value.trim();
-    const status=$('#m-status').value;
-    if(!eco || !viaje){ alert('Eco y N° de Viaje son obligatorios'); return; }
-    await dbSaveHeader();
-    const { error } = await sb.from('ops_active').insert({ tipo:'MADRINAS', eco, vins, viaje, status });
-    if(error){ alert('Error al guardar (Madrinas): '+error.message); return; }
-    $('#m-eco').value=''; $('#m-viaje').value='';
-    flash('msg-m');
-  }
-
-  async function addNacional(){
-    const eco=$('#n-eco').value.trim();
-    const operador=$('#n-operador').value.trim();
-    const telefono=$('#n-telefono').value.trim();
-    const status=$('#n-status').value;
-    if(!eco){ alert('Eco es obligatorio'); return; }
-    await dbSaveHeader();
-    const { error } = await sb.from('ops_nacionales').insert({
-      cliente: $('#h-cliente').value, fecha: $('#h-fecha').value,
-      eco, operador, telefono, status
-    });
-    if(error){ alert('Error al guardar (Nacionales): '+error.message); return; }
-    $('#n-eco').value=''; $('#n-operador').value=''; $('#n-telefono').value='';
-    flash('msg-n');
-  }
-
-  async function addContenedor(){
-    const transporte=$('#c-transporte').value.trim();
-    const operador=$('#c-operador').value.trim();
-    const telefono=$('#c-telefono').value.trim();
-    const economico=$('#c-economico').value.trim();
-    const placa=$('#c-placa').value.trim();
-    const contenedor=$('#c-contenedor').value.trim();
-    const terminal=$('#c-terminal').value.trim();
-    const status=$('#c-status').value;
-    if(!transporte || !contenedor){ alert('Transporte y No. Contenedor son obligatorios'); return; }
-    await dbSaveHeader();
-    const { error } = await sb.from('ops_contenedores').insert({
-      cliente: $('#h-cliente').value, fecha: $('#h-fecha').value,
-      transporte, operador, telefono, economico, placa, contenedor, terminal, status
-    });
-    if(error){ alert('Error al guardar (Contenedores): '+error.message); return; }
-    ['c-transporte','c-operador','c-telefono','c-economico','c-placa','c-contenedor','c-terminal'].forEach(id=>{ $('#'+id).value=''; });
-    flash('msg-c');
-  }
-
-  function flash(id){
-    const el=document.getElementById(id);
-    el.classList.remove('hidden');
-    setTimeout(()=>el.classList.add('hidden'),1800);
-  }
+(async()=>{
+ $('#h-fecha').value=new Date().toISOString().slice(0,10);
+ $('#h-transportista').addEventListener('change',()=>{
+   const val=$('#h-transportista').value,logo=LOGO_RIGHT[val]||'';const img=$('#logo-right');
+   if(logo){img.src=logo;img.style.display='block';}else{img.src='';img.style.display='none';}
+ });
+ document.querySelectorAll('[data-tab]').forEach(b=>b.onclick=()=>{document.querySelectorAll('[data-tab]').forEach(x=>x.setAttribute('aria-selected',x==b));['madrinas','nacionales','contenedores'].forEach(t=>$('#tab-'+t).classList.toggle('hidden',t!==b.dataset.tab));});
+ $('#btn-m').onclick=async()=>{await saveHeader();await sb.from('ops_active').insert({tipo:'MADRINAS',eco:$('#m-eco').value,vins:$('#m-vins').value,viaje:$('#m-viaje').value,status:$('#m-status').value});$('#m-eco').value='';$('#m-viaje').value='';msg('msg-m');};
+ $('#btn-n').onclick=async()=>{await saveHeader();await sb.from('ops_nacionales').insert({cliente:$('#h-cliente').value,fecha:$('#h-fecha').value,economico:$('#n-economico').value,placa:$('#n-placa').value,operador:$('#n-operador').value,asignacion:$('#n-asignacion').value,no_viaje:$('#n-no_viaje').value,dealer:$('#n-dealer').value,origen:$('#n-origen').value,destino:$('#n-destino').value,ubicacion:$('#n-ubicacion').value,status:$('#n-status').value,inicio_ruta:$('#n-inicio_ruta').value||null,llegada_destino:$('#n-llegada_destino').value||null});msg('msg-n');};
+ $('#btn-c').onclick=async()=>{await saveHeader();await sb.from('ops_contenedores').insert({cliente:$('#h-cliente').value,fecha:$('#h-fecha').value,transporte:$('#c-transporte').value,operador:$('#c-operador').value,telefono:$('#c-telefono').value,economico:$('#c-economico').value,placa:$('#c-placa').value,contenedor:$('#c-contenedor').value,terminal:$('#c-terminal').value,status:$('#c-status').value});msg('msg-c');};
+})();
+function msg(id){const e=document.getElementById(id);e.classList.remove('hidden');setTimeout(()=>e.classList.add('hidden'),1600);}
 </script>
 </body>
 </html>
