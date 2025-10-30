@@ -1,167 +1,387 @@
 <!doctype html>
-<html lang="es" class="h-full">
+<html lang="es">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Centro de Monitoreo</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/lucide@latest"></script>
-  <style>
-    :root{ --bg:#05070b; --panel:#0b1220; --edge:#101826; --txt:#c7d2fe; --cyan:#22d3ee; --vio:#8b5cf6; --rose:#fb7185; }
-    html,body{height:100%}
-    body{ color:#e5e7eb; background:
-      radial-gradient(1200px 800px at 10% 0%,#0b1220 0%,transparent 60%),
-      radial-gradient(800px 600px at 90% 10%,#0a1630 0%,transparent 55%),
-      linear-gradient(180deg,#05070b 0%,#070b12 60%,#05070b 100%);
-      font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial; }
-    body::before{ content:"";position:fixed;inset:0;pointer-events:none;background:
-      linear-gradient(transparent 31px, rgba(34,211,238,.06) 32px),
-      linear-gradient(90deg, transparent 31px, rgba(139,92,246,.06) 32px);
-      background-size:32px 32px;mask-image:radial-gradient(circle at 50% 30%, black 40%, transparent 70%);}
-    header,.neon-panel{ border:1px solid #0f1b2e;background:linear-gradient(180deg,#0b1220 0%, #0a1323 100%),rgba(0,0,0,.4);
-      box-shadow:0 0 0 1px rgba(34,211,238,.15) inset, 0 0 32px rgba(34,211,238,.06);}
-    .glow{box-shadow:0 0 0 1px rgba(34,211,238,.18) inset, 0 0 24px rgba(139,92,246,.12)}
-    .tab-btn{position:relative;overflow:hidden;transition:.35s}
-    .tab-btn::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;transform:scaleX(0);transform-origin:left;
-      background:linear-gradient(90deg,var(--cyan),var(--vio));transition:transform .35s}
-    .tab-btn.active::after{transform:scaleX(1)} .tab-btn:active{transform:translateY(1px)}
-    .btn{border:1px solid #1b2a40;background:#0d1524}
-    .btn:hover{border-color:rgba(34,211,238,.4);box-shadow:0 0 0 1px rgba(34,211,238,.25) inset}
-    iframe{transition:opacity .35s, filter .35s, transform .35s;} iframe.loading{opacity:.15;filter:blur(2px) saturate(.8);transform:scale(.996)}
-    @keyframes fadeUp{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}} .animate-in{animation:fadeUp .5s ease both}
-    @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
-    .input{border:1px solid #1f2a40;background:#0e1423;border-radius:.75rem;padding:.6rem .8rem;outline:none}
-    .input:focus{box-shadow:0 0 0 2px rgba(34,211,238,.35)}
-  </style>
+<meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Operación del día – Altas (Madrinas · Nacionales · Contenedores)</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  body{
+    background:
+      radial-gradient(1200px 800px at 8% -10%, rgba(34,211,238,.08) 0%, transparent 60%),
+      radial-gradient(900px 700px at 100% 0%, rgba(139,92,246,.08) 0%, transparent 55%),
+      linear-gradient(180deg,#0a0f1a 0%,#06080f 100%);
+    color:#e5e7eb;
+  }
+  .card{background:rgba(15,23,41,.7);border:1px solid #1f2a44;border-radius:16px}
+  .tabs button[aria-selected="true"]{background:#0f172a;border-color:#22d3ee;color:#e6faff}
+  .in{background:#0b1324;border:1px solid #1b2742;border-radius:10px;padding:.6rem .8rem}
+  .in:focus{outline:none;border-color:#22d3ee;box-shadow:0 0 0 2px rgba(34,211,238,.15)}
+  label>span{font-size:.72rem;color:#cbd5e1}
+  .grid-5{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:.75rem}
+  .grid-4{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.75rem}
+  .grid-3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.75rem}
+  @media (max-width:1024px){.grid-5,.grid-4,.grid-3{grid-template-columns:1fr}}
+</style>
 </head>
-<body class="h-full">
-  <div id="app" class="h-full">
-    <header class="sticky top-0 z-40 border-b border-slate-800/60 bg-slate-900/60 backdrop-blur neon-panel">
-      <div class="mx-auto max-w-7xl px-4 py-3 flex items-center justify-between">
-        <div class="flex items-center gap-3">
-          <!-- 🔹 Reemplazo: logo TSC (antes había un cuadro con un ícono SVG) -->
-          <img
-            src="https://raw.githubusercontent.com/ChronosBVRX/TSC/main/Imagen%20de%20WhatsApp%202025-10-29%20a%20las%2013.29.51_292c634c.jpg"
-            alt="TSC"
-            class="h-8 w-8 rounded-xl object-cover ring-1 ring-cyan-400/40 bg-cyan-500/20"
-            onerror="this.style.display='none';"
-          />
-          <div>
-            <h1 class="text-sm font-semibold leading-tight">Centro de Monitoreo</h1>
-            <p id="env-label" class="text-[11px] text-slate-400">Entorno</p>
-          </div>
-        </div>
-        <div class="flex items-center gap-3">
-          <span id="user-email" class="text-xs text-slate-300 hidden"></span>
-          <button id="btn-logout" class="hidden rounded-lg px-3 py-1.5 text-xs btn">Salir</button>
+<body class="min-h-screen">
+
+<main class="max-w-5xl mx-auto p-4 space-y-4">
+
+  <!-- Encabezado del día -->
+  <section class="card p-4">
+    <div class="flex items-center justify-between mb-3">
+      <h2 class="text-sm font-semibold">Encabezado del día</h2>
+      <span id="chip-tipo" class="text-[11px] px-2 py-1 rounded bg-cyan-600/20 border border-cyan-600/40 text-cyan-200">
+        Alta para: <b id="chip-tipo-txt">MADRINAS</b>
+      </span>
+    </div>
+
+    <div class="grid-3">
+      <label class="grid gap-1"><span>Cliente</span>
+        <input id="cliente" class="in" value="FORD"/>
+      </label>
+      <label class="grid gap-1"><span>Buque</span>
+        <input id="buque" class="in" placeholder="LAPIS ARROW"/>
+      </label>
+      <label class="grid gap-1"><span>Fecha</span>
+        <input id="fecha" type="date" class="in"/>
+      </label>
+    </div>
+
+    <!-- Logos -->
+    <div class="mt-3 grid-3 items-end">
+      <div class="text-xs">
+        <div class="mb-1">Logo izquierdo (fijo)</div>
+        <div class="flex items-center gap-2">
+          <img id="prev-left" class="h-10 rounded border border-slate-700" alt="TSC">
+          <span class="text-[11px] text-slate-400">TSC siempre va a la izquierda</span>
         </div>
       </div>
-    </header>
 
-    <!-- Login -->
-    <main id="view-login" class="mx-auto max-w-md p-6">
-      <div class="rounded-2xl p-6 neon-panel glow animate-in">
-        <h2 class="mb-1 text-lg font-semibold">Monitor Web – Acceso</h2>
-        <p class="mb-6 text-sm text-slate-400">Ingresa las credenciales proporcionadas para continuar.</p>
-        <form id="login-form" class="grid gap-3">
-          <label class="grid gap-1 text-sm"><span>Correo electrónico</span><input id="email" type="email" required class="input" placeholder="tucorreo@empresa.com" /></label>
-          <label class="grid gap-1 text-sm"><span>Contraseña</span><input id="password" type="password" required class="input" placeholder="••••••••" /></label>
-          <button type="submit" class="mt-2 rounded-xl bg-cyan-600 px-4 py-2 text-sm font-semibold hover:bg-cyan-500">Ingresar</button>
-        </form>
-        <p id="login-error" class="mt-3 text-sm text-rose-400 hidden"></p>
-        <p class="mt-6 text-[11px] text-slate-500">Acceso estático para demostración.</p>
+      <label class="grid gap-1 text-xs">
+        <span>Logo derecho (transportista)</span>
+        <select id="transportista" class="in">
+          <option value="">— Ninguno —</option>
+          <option value="HADRON">HADRON</option>
+          <option value="RAPIDOS">RÁPIDOS</option>
+        </select>
+      </label>
+
+      <div class="text-xs">
+        <div class="mb-1">Vista previa (derecha)</div>
+        <img id="prev-right" class="h-10 rounded border border-slate-700" alt="Transportista" style="display:none">
       </div>
-    </main>
+    </div>
 
-    <!-- App -->
-    <main id="view-app" class="hidden">
-      <nav class="mx-auto max-w-7xl px-4 pt-4">
-        <div class="flex gap-2 overflow-x-auto">
-          <button data-tab="operacion" class="tab-btn active rounded-full border border-cyan-500/30 bg-cyan-500/10 px-3 py-1.5 text-xs font-semibold text-cyan-200">Operación del día</button>
-          <button data-tab="activas"   class="tab-btn rounded-full border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs">Activas</button>
-          <button data-tab="monitoreo" class="tab-btn rounded-full border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs">Monitoreo</button>
-          <button data-tab="reportes"  class="tab-btn rounded-full border border-slate-700 bg-slate-800 px-3 py-1.5 text-xs">Reportes</button>
-        </div>
-      </nav>
+    <p class="mt-2 text-[11px] text-slate-400">
+      El logo de TSC se coloca a la izquierda. A la derecha irá el transportista elegido (HADRON o RÁPIDOS). Si no eliges, no se mostrará.
+    </p>
+  </section>
 
-      <section class="mx-auto mt-3 max-w-7xl px-4 animate-in">
-        <div class="flex flex-wrap items-center justify-between gap-3 rounded-xl p-3 neon-panel glow">
-          <div class="flex items-center gap-2 text-xs text-slate-400">
-            <span class="inline-flex h-2.5 w-2.5 animate-pulse rounded-full bg-emerald-400"></span>
-            <span id="status-label">Conectado</span>
-          </div>
-          <div class="flex items-center gap-2">
-            <button id="btn-refresh" class="rounded-lg px-3 py-1.5 text-xs btn">Refrescar pestaña</button>
-            <button id="btn-open-new" class="rounded-lg px-3 py-1.5 text-xs btn">Abrir en ventana</button>
-          </div>
-        </div>
-      </section>
+  <!-- Tabs -->
+  <section class="card p-2">
+    <div class="tabs flex gap-2 p-2">
+      <button class="px-3 py-2 text-xs rounded border border-slate-700" data-tab="madrinas" aria-selected="true">Madrinas</button>
+      <button class="px-3 py-2 text-xs rounded border border-slate-700" data-tab="nacionales">Nacionales</button>
+      <button class="px-3 py-2 text-xs rounded border border-slate-700" data-tab="contenedores">Contenedores</button>
+    </div>
 
-      <section class="mx-auto mt-3 max-w-7xl px-4 pb-6">
-        <div class="h-[70vh] overflow-hidden rounded-2xl border border-slate-800 bg-slate-900 neon-panel glow">
-          <!-- SANDBOX actualizado para permitir abrir ZEEK en la MISMA pestaña del index por acción del usuario -->
-          <iframe id="content-frame" class="h-full w-full"
-            referrerpolicy="no-referrer"
-            sandbox="allow-same-origin allow-scripts allow-forms allow-popups allow-top-navigation-by-user-activation"></iframe>
+    <!-- MADRINAS -->
+    <div id="tab-madrinas" class="p-4 space-y-3">
+      <h3 class="text-sm font-semibold">Agregar operación – Madrinas</h3>
+      <div class="grid-5">
+        <label class="grid gap-1"><span>Eco</span>
+          <input id="m-eco" class="in" placeholder="17017 / M1"/>
+        </label>
+        <label class="grid gap-1"><span>N° de VINS</span>
+          <input id="m-vins" type="number" value="9" min="0" class="in"/>
+        </label>
+        <label class="grid gap-1"><span>N° de Viaje</span>
+          <input id="m-viaje" class="in" placeholder="MED-01"/>
+        </label>
+        <label class="grid gap-1"><span>Status</span>
+          <select id="m-status" class="in">
+            <option>TRAYECTO A ASLA</option>
+            <option>EN TERMINAL PROCESO DE CARGA</option>
+            <option>SALIENDO DE TERMINAL CARGADO</option>
+            <option>CARGADO EN RUTA FISCAL</option>
+            <option>POR MODULAR</option>
+            <option>TRAYECTO A PATIO DE DESCARGA</option>
+            <option>DESCARGADO 100%</option>
+            <option>1ER VUELTA</option>
+            <option>2DA VUELTA</option>
+            <option>3ER VUELTA</option>
+            <option>4TA VUELTA</option>
+            <option>5TA VUELTA</option>
+            <option>EN PATIO EN PROCESO DE DESCARGA</option>
+            <option>EN TRAYECTO A PATIO DE RESGUARDO</option>
+            <option>CARGADO EN PATIO DE RESGUARDO</option>
+            <option>TRAYECTO A TERMINAL</option>
+            <option>REGISTRADO EN ESPERA DE LLAMADO</option>
+            <option>EN TERMINAL EN ESPERA DE CARGA EN ASLA</option>
+          </select>
+        </label>
+        <div class="flex items-end">
+          <button class="w-full rounded-lg bg-cyan-600 hover:bg-cyan-500 px-3 py-2 text-xs font-semibold" id="btn-m">Agregar</button>
         </div>
-        <p class="mt-2 text-[11px] text-slate-500">Nota: algunas páginas pueden bloquear el embebido por políticas de seguridad.</p>
-      </section>
-    </main>
+      </div>
+      <p id="msg-m" class="text-xs text-emerald-300 hidden">Operación agregada a <b>Madrinas</b>.</p>
+    </div>
+
+    <!-- NACIONALES -->
+    <div id="tab-nacionales" class="p-4 space-y-3 hidden">
+      <h3 class="text-sm font-semibold">Agregar operación – Nacionales</h3>
+      <div class="grid-5">
+        <label class="grid gap-1"><span>Eco</span>
+          <input id="n-eco" class="in" placeholder="Económico"/>
+        </label>
+        <label class="grid gap-1"><span>Operador</span>
+          <input id="n-operador" class="in" placeholder="Nombre del operador"/>
+        </label>
+        <label class="grid gap-1"><span>Teléfono</span>
+          <input id="n-telefono" class="in" placeholder="753 000 0000"/>
+        </label>
+        <label class="grid gap-1"><span>Status</span>
+          <select id="n-status" class="in">
+            <option>EN ORIGEN</option>
+            <option>CARGANDO</option>
+            <option>EN TRÁNSITO</option>
+            <option>DESCARGANDO</option>
+            <option>ENTREGADO</option>
+            <option>INCIDENCIA</option>
+          </select>
+        </label>
+        <div class="flex items-end">
+          <button class="w-full rounded-lg bg-cyan-600 hover:bg-cyan-500 px-3 py-2 text-xs font-semibold" id="btn-n">Agregar</button>
+        </div>
+      </div>
+      <p class="text-[11px] text-slate-400">* Si después quieres más campos para Nacionales (origen, destino, producto, etc.), los agregamos.</p>
+      <p id="msg-n" class="text-xs text-emerald-300 hidden">Operación agregada a <b>Nacionales</b>.</p>
+    </div>
+
+    <!-- CONTENEDORES -->
+    <div id="tab-contenedores" class="p-4 space-y-3 hidden">
+      <h3 class="text-sm font-semibold">Agregar operación – Contenedores</h3>
+      <div class="grid-4">
+        <label class="grid gap-1"><span>Transporte</span>
+          <input id="c-transporte" class="in" placeholder="TSC / Proveedor"/>
+        </label>
+        <label class="grid gap-1"><span>Operador</span>
+          <input id="c-operador" class="in" placeholder="OSVALDO LEAL"/>
+        </label>
+        <label class="grid gap-1"><span>Teléfono</span>
+          <input id="c-telefono" class="in" placeholder="753 157 8649"/>
+        </label>
+        <label class="grid gap-1"><span>Económico</span>
+          <input id="c-economico" class="in" placeholder="17019"/>
+        </label>
+      </div>
+
+      <div class="grid-4">
+        <label class="grid gap-1"><span>Placa</span>
+          <input id="c-placa" class="in" placeholder="NS7248C"/>
+        </label>
+        <label class="grid gap-1"><span>No. Contenedor</span>
+          <input id="c-contenedor" class="in" placeholder="BMOU5567200 / ILLU4519583"/>
+        </label>
+        <label class="grid gap-1"><span>Terminal</span>
+          <input id="c-terminal" class="in" placeholder="LCPTC / APM / SSA"/>
+        </label>
+        <label class="grid gap-1"><span>Status</span>
+          <select id="c-status" class="in">
+            <option>REGISTRADO EN ESPERA DE LLAMADO</option>
+            <option>ASIGNADO PARA ENTRADA</option>
+            <option>EN FILA DE ACCESO</option>
+            <option>DENTRO DE TERMINAL</option>
+            <option>SALIENDO DE TERMINAL</option>
+            <option>EN TRÁNSITO</option>
+            <option>ENTREGADO</option>
+            <option>INCIDENCIA</option>
+          </select>
+        </label>
+      </div>
+
+      <div class="flex justify-end">
+        <button class="rounded-lg bg-cyan-600 hover:bg-cyan-500 px-3 py-2 text-xs font-semibold" id="btn-c">Agregar</button>
+      </div>
+      <p id="msg-c" class="text-xs text-emerald-300 hidden">Operación agregada a <b>Contenedores</b>.</p>
+    </div>
+  </section>
+
+  <div class="flex gap-2">
+    <a href="activas.html" class="px-3 py-2 text-xs rounded-lg border border-slate-700">Ir a Activas</a>
   </div>
+</main>
 
-  <script>
-    const STATIC_AUTH = { user:"Monitor@TSC.com", pass_hash:"WMpuIG2Kaatbz1D9230zzEFx5JyCZCMi32HMeC8sSs8" };
-    const URLS = {
-      operacion: "operacion.html",
-      activas:   "activas.html",
-      monitoreo: "monitoreo.html",
-      reportes:  "reportes.html"
-    };
-    async function sha256Base64(text){ const enc=new TextEncoder().encode(text); const buf=await crypto.subtle.digest('SHA-256',enc);
-      const bytes=Array.from(new Uint8Array(buf)); const bin=String.fromCharCode(...bytes); return btoa(bin).replace(/=/g,''); }
-    const $=(s)=>document.querySelector(s), $$=(s)=>Array.from(document.querySelectorAll(s));
-    const viewLogin=$('#view-login'), viewApp=$('#view-app'), userEmail=$('#user-email'), btnLogout=$('#btn-logout');
-    const iframe=$('#content-frame'), btnRefresh=$('#btn-refresh'), btnOpenNew=$('#btn-open-new');
+<!-- Supabase -->
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<script>
+  // ========= SUPABASE =========
+  const SUPABASE_URL = "https://xugajqlyvojqeciawpzj.supabase.co";
+  const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh1Z2FqcWx5dm9qcWVjaWF3cHpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE3NjM4MzksImV4cCI6MjA3NzMzOTgzOX0.tt2_6zqf9R0cGO6Fenx_FJO6sAg6jM_CYY1Peuq6Qyo";
+  const sb = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-    function setActiveTab(name){
-      $$('.tab-btn').forEach(b=>{ const a=b.dataset.tab===name;
-        b.classList.toggle('active',a); b.classList.toggle('bg-cyan-500/10',a);
-        b.classList.toggle('border-cyan-500/30',a); b.classList.toggle('text-cyan-200',a);
-        b.classList.toggle('bg-slate-800',!a); b.classList.toggle('border-slate-700',!a);
-      });
-      loadIframeFor(name); localStorage.setItem('lastTab',name);
+  /* Estructuras sugeridas en Supabase:
+  -- header(id text pk, cliente text, buque text, fecha date, transportista text, logo_right_url text)
+  -- ops_active(id bigserial pk, tipo text, eco text, vins int, viaje text, status text, created_at timestamptz default now())
+  -- ops_nacionales(id bigserial pk, cliente text, fecha date, eco text, operador text, telefono text, status text, created_at timestamptz default now())
+  -- ops_contenedores(id bigserial pk, cliente text, fecha date, transporte text, operador text, telefono text, economico text, placa text, contenedor text, terminal text, status text, created_at timestamptz default now())
+  */
+
+  // ========= LOGOS =========
+  const LOGO_LEFT_TSC = "https://raw.githubusercontent.com/ChronosBVRX/TSC/main/Imagen%20de%20WhatsApp%202025-10-29%20a%20las%2013.29.51_292c634c.jpg";
+  const LOGO_RIGHT = {
+    "": "",
+    "HADRON": "https://raw.githubusercontent.com/ChronosBVRX/TSC/main/hadron.jpg",
+    "RAPIDOS": "https://raw.githubusercontent.com/ChronosBVRX/TSC/main/RAPIDOS-DE-MICHOACAN-1.jpg"
+  };
+
+  const $ = s => document.querySelector(s);
+  const byId = id => document.getElementById(id);
+
+  // ========= INIT =========
+  (async ()=>{
+    byId('fecha').value = new Date().toISOString().slice(0,10);
+    byId('prev-left').src = LOGO_LEFT_TSC;
+
+    const h = await dbLoadHeader();
+    if(h){
+      byId('cliente').value = h.cliente || '';
+      byId('buque').value   = h.buque || '';
+      byId('fecha').value   = h.fecha || byId('fecha').value;
+      byId('transportista').value = h.transportista || '';
     }
-    function loadIframeFor(name){
-      const url=URLS[name]; if(!url) return;
-      iframe.classList.add('loading');
-      iframe.src=url+(url.includes('?')?'&':'?')+'ts='+Date.now();
-    }
-    iframe.addEventListener('load',()=>iframe.classList.remove('loading'));
-    $$('.tab-btn').forEach(b=> b.addEventListener('click',()=>setActiveTab(b.dataset.tab)));
-    btnRefresh.addEventListener('click',()=>{ const a=document.querySelector('.tab-btn.active')?.dataset.tab||'operacion'; loadIframeFor(a); });
-    btnOpenNew.addEventListener('click',()=>{ const a=document.querySelector('.tab-btn.active')?.dataset.tab||'operacion'; const url=URLS[a]; if(url) window.open(url,'_blank','noopener'); });
+    updateRightPreview();
 
-    // Login estático
-    const loginForm=document.getElementById('login-form');
-    loginForm.addEventListener('submit',async e=>{
-      e.preventDefault(); $('#login-error').classList.add('hidden');
-      const email=$('#email').value.trim(); const password=$('#password').value;
-      try{ const hash=await sha256Base64(password);
-        if(email===STATIC_AUTH.user && hash===STATIC_AUTH.pass_hash){ localStorage.setItem('sessionEmail',email); await onAuthChanged({email}); }
-        else throw new Error('Credenciales inválidas. Verifica el correo y la contraseña.');
-      }catch(err){ console.error(err); $('#login-error').textContent=err.message||'Error al iniciar sesión'; $('#login-error').classList.remove('hidden'); }
+    // eventos
+    $('#transportista').addEventListener('change', updateRightPreview);
+    document.querySelectorAll('.tabs button').forEach(btn=>{
+      btn.addEventListener('click',()=>switchTab(btn.dataset.tab));
     });
-    btnLogout.addEventListener('click',()=>{ localStorage.removeItem('sessionEmail'); renderForAuth(null); });
 
-    async function onAuthChanged(user){ renderForAuth(user); if(user){ const last=localStorage.getItem('lastTab')||'operacion'; setActiveTab(last); } }
-    function renderForAuth(user){
-      if(user){ viewLogin.classList.add('hidden'); viewApp.classList.remove('hidden'); viewApp.classList.add('animate-in'); userEmail.textContent=user.email; userEmail.classList.remove('hidden'); btnLogout.classList.remove('hidden'); }
-      else{ viewApp.classList.add('hidden'); viewLogin.classList.remove('hidden'); userEmail.classList.add('hidden'); btnLogout.classList.add('hidden'); }
+    // botones de alta
+    byId('btn-m').addEventListener('click', addMadrina);
+    byId('btn-n').addEventListener('click', addNacional);
+    byId('btn-c').addEventListener('click', addContenedor);
+  })();
+
+  function switchTab(tab){
+    // visual
+    document.querySelectorAll('.tabs button').forEach(b=>{
+      b.setAttribute('aria-selected', String(b.dataset.tab===tab));
+    });
+    ['madrinas','nacionales','contenedores'].forEach(t=>{
+      byId('tab-'+t).classList.toggle('hidden', t!==tab);
+    });
+    // chip
+    const map = {madrinas:'MADRINAS', nacionales:'NACIONALES', contenedores:'CONTENEDORES'};
+    byId('chip-tipo-txt').textContent = map[tab];
+  }
+
+  function updateRightPreview() {
+    const sel = byId('transportista').value || '';
+    const url = LOGO_RIGHT[sel] || '';
+    const img = byId('prev-right');
+    if (url) {
+      img.src = url;
+      img.style.display = 'block';
+    } else {
+      img.src = '';
+      img.style.display = 'none';
     }
+  }
 
-    (async ()=>{ const email=localStorage.getItem('sessionEmail'); await onAuthChanged(email?{email}:null);
-      const host=location.hostname; const envLabel=host.includes('localhost')?'DEV':(host.includes('staging')?'STG':'PROD');
-      document.getElementById('env-label').textContent=`Entorno ${envLabel}`; })();
-  </script>
+  // ========= DB helpers =========
+  async function dbLoadHeader(){
+    const { data, error } = await sb.from('header').select('*').eq('id','dia').maybeSingle();
+    if(error && error.code!=='PGRST116') console.error(error);
+    return data || null;
+  }
+  async function dbSaveHeader(){
+    const transportista = byId('transportista').value || '';
+    const logo_right_url = LOGO_RIGHT[transportista] || '';
+    const payload = {
+      id:'dia',
+      cliente: byId('cliente').value,
+      buque: byId('buque').value,
+      fecha: byId('fecha').value,
+      transportista, logo_right_url
+    };
+    const { error } = await sb.from('header').upsert(payload);
+    if(error) console.error(error);
+  }
+
+  // ========= ALTAS =========
+  async function addMadrina(){
+    const eco   = byId('m-eco').value.trim();
+    const vins  = parseInt(byId('m-vins').value||'0',10);
+    const viaje = byId('m-viaje').value.trim();
+    const status= byId('m-status').value;
+
+    if(!eco || !viaje){ alert('Eco y N° de Viaje son obligatorios'); return; }
+
+    await dbSaveHeader();
+
+    const { error } = await sb.from('ops_active').insert({
+      tipo:'MADRINAS', eco, vins, viaje, status
+    });
+    if(error){ alert('Error al guardar (Madrinas): '+error.message); return; }
+
+    byId('m-eco').value=''; byId('m-viaje').value='';
+    showMsg('msg-m');
+  }
+
+  async function addNacional(){
+    const eco = byId('n-eco').value.trim();
+    const operador = byId('n-operador').value.trim();
+    const telefono = byId('n-telefono').value.trim();
+    const status = byId('n-status').value;
+
+    if(!eco){ alert('Eco es obligatorio'); return; }
+
+    await dbSaveHeader();
+
+    const { error } = await sb.from('ops_nacionales').insert({
+      cliente: byId('cliente').value,
+      fecha: byId('fecha').value,
+      eco, operador, telefono, status
+    });
+    if(error){ alert('Error al guardar (Nacionales): '+error.message); return; }
+
+    byId('n-eco').value=''; byId('n-operador').value=''; byId('n-telefono').value='';
+    showMsg('msg-n');
+  }
+
+  async function addContenedor(){
+    const transporte = byId('c-transporte').value.trim();
+    const operador   = byId('c-operador').value.trim();
+    const telefono   = byId('c-telefono').value.trim();
+    const economico  = byId('c-economico').value.trim();
+    const placa      = byId('c-placa').value.trim();
+    const contenedor = byId('c-contenedor').value.trim();
+    const terminal   = byId('c-terminal').value.trim();
+    const status     = byId('c-status').value;
+
+    if(!transporte || !contenedor){ alert('Transporte y No. Contenedor son obligatorios'); return; }
+
+    await dbSaveHeader();
+
+    const { error } = await sb.from('ops_contenedores').insert({
+      cliente: byId('cliente').value,
+      fecha: byId('fecha').value,
+      transporte, operador, telefono, economico, placa, contenedor, terminal, status
+    });
+    if(error){ alert('Error al guardar (Contenedores): '+error.message); return; }
+
+    ['c-transporte','c-operador','c-telefono','c-economico','c-placa','c-contenedor','c-terminal'].forEach(id=>byId(id).value='');
+    showMsg('msg-c');
+  }
+
+  function showMsg(id){
+    const el = byId(id);
+    el.classList.remove('hidden');
+    setTimeout(()=>el.classList.add('hidden'),1800);
+  }
+</script>
 </body>
 </html>
