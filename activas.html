@@ -4,6 +4,8 @@
 <meta charset="utf-8"/><meta name="viewport" content="width=device-width, initial-scale=1"/>
 <title>Operación del día – Activas</title>
 <script src="https://cdn.tailwindcss.com"></script>
+<!-- html2canvas para generar imagen PNG de la tabla -->
+<script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
 <style>
   :root{ --bg:#05070b; --panel:#0b1220; --edge:#101826; --txt:#c7d2fe; --cyan:#22d3ee; --vio:#8b5cf6; --rose:#fb7185; }
   body{
@@ -57,11 +59,12 @@
       <div class="flex items-center gap-2">
         <a href="operacion.html" class="px-3 py-2 text-xs rounded border border-slate-700">← Altas</a>
         <button id="btn-export" class="px-3 py-2 text-xs rounded bg-cyan-600 hover:bg-cyan-500">Exportar CSV</button>
+        <button id="btn-png" class="px-3 py-2 text-xs rounded border border-slate-700">Descargar PNG</button>
       </div>
     </div>
 
     <div class="p-3 grid-3">
-      <label class="grid gap-1"><span>Fecha (del registro)</span>
+      <label class="grid gap-1"><span>Fecha del día</span>
         <input id="f-fecha" type="date" class="in">
       </label>
       <label class="grid gap-1"><span>Status</span>
@@ -76,12 +79,12 @@
   </section>
 
   <!-- Tabla -->
-  <section class="card p-4">
+  <section class="card p-4" id="tabla-card">
     <div class="mb-2 text-[12px] text-slate-300">
       Mostrando: <b id="lbl-tipo">Madrinas</b> · Coincidencias: <b id="lbl-count">0</b>
     </div>
     <div class="overflow-auto">
-      <table class="table w-full text-sm">
+      <table class="table w-full text-sm" id="tabla">
         <thead id="thead"></thead>
         <tbody id="tbody"></tbody>
         <tfoot id="tfoot"></tfoot>
@@ -100,6 +103,12 @@
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh1Z2FqcWx5dm9qcWVjaWF3cHpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE3NjM4MzksImV4cCI6MjA3NzMzOTgzOX0.tt2_6zqf9R0cGO6Fenx_FJO6sAg6jM_CYY1Peuq6Qyo"
   );
 
+  const LOGO_RIGHT={
+    "": "",
+    HADRON:"https://raw.githubusercontent.com/ChronosBVRX/TSC/main/hadron.jpg",
+    RAPIDOS:"https://raw.githubusercontent.com/ChronosBVRX/TSC/main/RAPIDOS-DE-MICHOACAN-1.jpg"
+  };
+
   const $ = s => document.querySelector(s);
   const thead = $('#thead'), tbody = $('#tbody'), tfoot = $('#tfoot');
   const lblTipo = $('#lbl-tipo'), lblCount = $('#lbl-count');
@@ -115,7 +124,7 @@
       { key:'vins',     name:'VINS' },
       { key:'viaje',    name:'N° Viaje' },
       { key:'status',   name:'Status' },
-      { key:'created_at', name:'Creado', fmt:v=>v?new Date(v).toLocaleString():'' }
+      { key:'created_at', name:'Captura', fmt:v=>v?new Date(v).toLocaleString():'' }
     ],
     nacionales: [
       { key:'economico',   name:'Económico' },
@@ -130,7 +139,7 @@
       { key:'status',      name:'Status' },
       { key:'inicio_ruta', name:'Inicio ruta',    fmt:v=>v?new Date(v).toLocaleString():'' },
       { key:'llegada_destino', name:'Llegada destino', fmt:v=>v?new Date(v).toLocaleString():'' },
-      { key:'created_at',  name:'Creado', fmt:v=>v?new Date(v).toLocaleString():'' }
+      { key:'created_at',  name:'Captura', fmt:v=>v?new Date(v).toLocaleString():'' }
     ],
     contenedores: [
       { key:'transporte', name:'Transporte' },
@@ -141,7 +150,7 @@
       { key:'contenedor', name:'No. Contenedor' },
       { key:'terminal',   name:'Terminal' },
       { key:'status',     name:'Status' },
-      { key:'created_at', name:'Creado', fmt:v=>v?new Date(v).toLocaleString():'' }
+      { key:'created_at', name:'Captura', fmt:v=>v?new Date(v).toLocaleString():'' }
     ]
   };
 
@@ -151,9 +160,8 @@
     const { data, error } = await sb.from(table).select('*').eq('id','dia').maybeSingle();
     if(error && error.code!=='PGRST116') console.error(error);
 
-    // Construir línea según tipo
     let line = '—';
-    let logo = '';
+    let transportista = '';
     if(data){
       if(tab==='madrinas'){
         const cli = data.cliente || '—';
@@ -169,16 +177,17 @@
         const t = data.terminal || '—';
         line = `Fecha: <b>${f}</b> · Terminal: <b>${t}</b>`;
       }
-      logo = data.logo_right_url || '';
+      transportista = data.transportista || '';
     }
     hdrTitle.textContent = 'PROGRAMMING OF THE DAY';
     hdrLine.innerHTML = line;
 
+    const logo = LOGO_RIGHT[transportista] || '';
     if(logo){ logoRight.src = logo; logoRight.style.display='block'; }
     else{ logoRight.src=''; logoRight.style.display='none'; }
 
-    // Prefijar filtro de fecha si viene en header
-    if(data?.fecha) $('#f-fecha').value = data.fecha;
+    // Prefijar fecha del filtro si viene en header, si no hoy
+    $('#f-fecha').value = (data?.fecha) ? data.fecha : new Date().toISOString().slice(0,10);
   }
 
   // ====== INICIO ======
@@ -195,11 +204,12 @@
       });
     });
 
-    // filtros + export
+    // filtros + export + png
     $('#f-q').addEventListener('input', applyFilters);
     $('#f-status').addEventListener('change', applyFilters);
-    $('#f-fecha').addEventListener('change', applyFilters);
+    $('#f-fecha').addEventListener('change', loadTab); // recarga datos del día
     $('#btn-export').addEventListener('click', exportCSV);
+    $('#btn-png').addEventListener('click', downloadPNG);
 
     await loadHeaderFor(tab);
     await loadTab();
@@ -210,20 +220,54 @@
   async function loadTab(){
     renderHead(COLS[tab]);
 
+    // Determinar rango del día elegido (00:00:00 a 23:59:59 local)
+    const day = $('#f-fecha').value || new Date().toISOString().slice(0,10);
+    const from = new Date(day + 'T00:00:00');
+    const to   = new Date(day + 'T23:59:59');
+
+    // Consulta base por tab
     let query;
     if(tab==='madrinas'){
-      query = sb.from('ops_active').select('*').eq('tipo','MADRINAS').order('created_at',{ascending:false});
+      // Trae TODAS las capturas de hoy para MADRINAS
+      query = sb.from('ops_active')
+        .select('*')
+        .eq('tipo','MADRINAS')
+        .gte('created_at', from.toISOString())
+        .lte('created_at', to.toISOString())
+        .order('created_at',{ascending:false});
     }else if(tab==='nacionales'){
-      query = sb.from('ops_nacionales').select('*').order('created_at',{ascending:false});
+      query = sb.from('ops_nacionales')
+        .select('*')
+        .gte('created_at', from.toISOString())
+        .lte('created_at', to.toISOString())
+        .order('created_at',{ascending:false});
     }else{
-      query = sb.from('ops_contenedores').select('*').order('created_at',{ascending:false});
+      query = sb.from('ops_contenedores')
+        .select('*')
+        .gte('created_at', from.toISOString())
+        .lte('created_at', to.toISOString())
+        .order('created_at',{ascending:false});
     }
 
     const { data, error } = await query;
     if(error){ console.error(error); dataRaw = []; }
     else { dataRaw = data || []; }
 
+    // Para MADRINAS: dejar SOLO la última captura por ECO (operación ACTIVA del día)
+    if(tab==='madrinas'){
+      const lastByEco = new Map();
+      for(const row of dataRaw){
+        const key = (row.eco || '').toString().trim();
+        if(!lastByEco.has(key)) lastByEco.set(key, row); // ya vienen ordenadas desc
+      }
+      dataRaw = Array.from(lastByEco.values()).sort((a,b)=>{
+        // ordena por eco asc para verse como en tu imagen
+        return String(a.eco).localeCompare(String(b.eco), 'es', {numeric:true});
+      });
+    }
+
     buildStatusOptions(dataRaw);
+    dataFiltered = dataRaw.slice();
     applyFilters(true);
   }
 
@@ -251,17 +295,15 @@
   function applyFilters(){
     const q = $('#f-q').value.trim().toLowerCase();
     const st = $('#f-status').value;
-    const fDate = $('#f-fecha').value;
     const cols = COLS[tab];
 
     dataFiltered = dataRaw.filter(row=>{
-      const passDate = !fDate || (row.fecha ? String(row.fecha) === fDate : true);
       const passSt   = !st || row.status === st;
       const passQ    = !q || cols.some(c=>{
         const val = row[c.key];
         return (val!==undefined && val!==null && String(val).toLowerCase().includes(q));
       });
-      return passDate && passSt && passQ;
+      return passSt && passQ;
     });
 
     renderBody(dataFiltered, cols);
@@ -297,7 +339,6 @@
     const td=document.createElement('td');
     td.colSpan=cols.length;
 
-    // Totales: Madrinas suma VINS; demás cuentan filas
     let extra='';
     if(tab==='madrinas'){
       const sumVins = rows.reduce((a,b)=>a + (parseInt(b.vins||0,10)||0), 0);
@@ -323,6 +364,17 @@
     const fn = `${cap(tab)}_${new Date().toISOString().slice(0,10)}.csv`;
     const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=fn;
     document.body.appendChild(a); a.click(); URL.revokeObjectURL(a.href); a.remove();
+  }
+
+  async function downloadPNG(){
+    const card = document.getElementById('tabla-card');
+    // Asegura fuente y fondo
+    card.style.background = getComputedStyle(card).background;
+    const canvas = await html2canvas(card, {backgroundColor: null, scale: 2});
+    const link = document.createElement('a');
+    link.download = `Activas_${$('#f-fecha').value || 'hoy'}.png`;
+    link.href = canvas.toDataURL('image/png');
+    link.click();
   }
 </script>
 </body>
