@@ -31,17 +31,15 @@
 <body class="min-h-screen">
 <main class="max-w-6xl mx-auto p-4 space-y-4">
 
-  <!-- Encabezado (logos + datos del día) -->
+  <!-- Encabezado (dinámico por tipo) -->
   <section class="card p-4">
     <div class="flex items-center justify-between gap-4">
       <div class="flex items-center gap-3">
-        <img id="logo-left" class="h-12 w-12 rounded-xl ring-1 ring-cyan-400/40 bg-cyan-500/20"
+        <img class="h-12 w-12 rounded-xl ring-1 ring-cyan-400/40 bg-cyan-500/20"
              src="https://raw.githubusercontent.com/ChronosBVRX/TSC/main/Imagen%20de%20WhatsApp%202025-10-29%20a%20las%2013.29.51_292c634c.jpg" alt="TSC">
         <div>
-          <div class="text-sm font-semibold">PROGRAMMING OF THE DAY</div>
-          <div class="text-[12px] text-slate-300">
-            Cliente: <b id="h-cliente">—</b> · Buque: <b id="h-buque">—</b> · Fecha: <b id="h-fecha">—</b>
-          </div>
+          <div id="hdr-title" class="text-sm font-semibold">PROGRAMMING OF THE DAY</div>
+          <div id="hdr-line" class="text-[12px] text-slate-300">—</div>
         </div>
       </div>
       <img id="logo-right" class="h-12 rounded border border-slate-700" alt="Transportista" style="display:none">
@@ -102,12 +100,11 @@
     "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh1Z2FqcWx5dm9qcWVjaWF3cHpqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjE3NjM4MzksImV4cCI6MjA3NzMzOTgzOX0.tt2_6zqf9R0cGO6Fenx_FJO6sAg6jM_CYY1Peuq6Qyo"
   );
 
-  // ====== ESTADO UI ======
   const $ = s => document.querySelector(s);
   const thead = $('#thead'), tbody = $('#tbody'), tfoot = $('#tfoot');
   const lblTipo = $('#lbl-tipo'), lblCount = $('#lbl-count');
+  const hdrTitle = $('#hdr-title'), hdrLine = $('#hdr-line'), logoRight = $('#logo-right');
 
-  let header = {};
   let tab = 'madrinas';
   let dataRaw = [], dataFiltered = [];
 
@@ -148,11 +145,44 @@
     ]
   };
 
+  // ====== ENCABEZADOS POR TIPO (lee tablas header_*) ======
+  async function loadHeaderFor(tab){
+    const table = 'header_'+tab;
+    const { data, error } = await sb.from(table).select('*').eq('id','dia').maybeSingle();
+    if(error && error.code!=='PGRST116') console.error(error);
+
+    // Construir línea según tipo
+    let line = '—';
+    let logo = '';
+    if(data){
+      if(tab==='madrinas'){
+        const cli = data.cliente || '—';
+        const buq = data.buque || '—';
+        const f   = data.fecha || '—';
+        line = `Cliente: <b>${cli}</b> · Buque: <b>${buq}</b> · Fecha: <b>${f}</b>`;
+      }else if(tab==='nacionales'){
+        const f = data.fecha || '—';
+        const z = data.zona  || '—';
+        line = `Fecha: <b>${f}</b> · Zona/Ruta: <b>${z}</b>`;
+      }else{
+        const f = data.fecha || '—';
+        const t = data.terminal || '—';
+        line = `Fecha: <b>${f}</b> · Terminal: <b>${t}</b>`;
+      }
+      logo = data.logo_right_url || '';
+    }
+    hdrTitle.textContent = 'PROGRAMMING OF THE DAY';
+    hdrLine.innerHTML = line;
+
+    if(logo){ logoRight.src = logo; logoRight.style.display='block'; }
+    else{ logoRight.src=''; logoRight.style.display='none'; }
+
+    // Prefijar filtro de fecha si viene en header
+    if(data?.fecha) $('#f-fecha').value = data.fecha;
+  }
+
   // ====== INICIO ======
   (async ()=>{
-    await loadHeader();
-    setHeaderUI();
-
     document.querySelectorAll('.tabs button').forEach(b=>{
       b.addEventListener('click', async ()=>{
         document.querySelectorAll('.tabs button').forEach(x=>x.setAttribute('aria-selected','false'));
@@ -160,6 +190,7 @@
         tab = b.dataset.tab;
         lblTipo.textContent = cap(tab);
         $('#f-status').innerHTML = '<option value="">— Todos —</option>'; // reset status list
+        await loadHeaderFor(tab);
         await loadTab();
       });
     });
@@ -170,27 +201,11 @@
     $('#f-fecha').addEventListener('change', applyFilters);
     $('#btn-export').addEventListener('click', exportCSV);
 
+    await loadHeaderFor(tab);
     await loadTab();
   })();
 
   function cap(s){ return s.charAt(0).toUpperCase()+s.slice(1); }
-
-  async function loadHeader(){
-    const { data, error } = await sb.from('header').select('*').eq('id','dia').maybeSingle();
-    if(error && error.code!=='PGRST116') console.error(error);
-    header = data || {};
-    if(header?.fecha) $('#f-fecha').value = header.fecha;
-  }
-
-  function setHeaderUI(){
-    $('#h-cliente').textContent = header?.cliente || '—';
-    $('#h-buque').textContent   = header?.buque   || '—';
-    $('#h-fecha').textContent   = header?.fecha   || '—';
-
-    const lr = $('#logo-right');
-    if(header?.logo_right_url){ lr.src = header.logo_right_url; lr.style.display='block'; }
-    else{ lr.src=''; lr.style.display='none'; }
-  }
 
   async function loadTab(){
     renderHead(COLS[tab]);
@@ -237,7 +252,6 @@
     const q = $('#f-q').value.trim().toLowerCase();
     const st = $('#f-status').value;
     const fDate = $('#f-fecha').value;
-
     const cols = COLS[tab];
 
     dataFiltered = dataRaw.filter(row=>{
@@ -279,11 +293,11 @@
   function renderFoot(rows, cols){
     tfoot.innerHTML='';
     if(rows.length===0) return;
-
-    // Totales simples: Madrinas suma VINS; todos cuentan filas
     const tr=document.createElement('tr');
     const td=document.createElement('td');
     td.colSpan=cols.length;
+
+    // Totales: Madrinas suma VINS; demás cuentan filas
     let extra='';
     if(tab==='madrinas'){
       const sumVins = rows.reduce((a,b)=>a + (parseInt(b.vins||0,10)||0), 0);
@@ -306,8 +320,7 @@
 
     const csv = headerRow + '\n' + bodyRows;
     const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
-    const d = (header?.fecha || new Date().toISOString().slice(0,10));
-    const fn = `${cap(tab)}_${d}.csv`;
+    const fn = `${cap(tab)}_${new Date().toISOString().slice(0,10)}.csv`;
     const a = document.createElement('a'); a.href=URL.createObjectURL(blob); a.download=fn;
     document.body.appendChild(a); a.click(); URL.revokeObjectURL(a.href); a.remove();
   }
